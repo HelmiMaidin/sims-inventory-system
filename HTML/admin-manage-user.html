@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIMS | Manage User</title>
+
+  <link rel="stylesheet" href="../CSS/admin-manage-user.css">
+</head>
+
+<body>
+  <div class="layout">
+    <aside>
+      <div class="brand">
+        <span class="brand-mark">▦</span>
+
+        <div>
+          <strong>SIMS</strong>
+          <small>Inventory System</small>
+        </div>
+      </div>
+
+      <div class="admin-mini-profile">
+        <span id="sidebarAdminAvatar" class="profile-avatar">A</span>
+
+        <div>
+          <strong id="sidebarAdminName">Admin User</strong>
+          <small>System Administrator</small>
+        </div>
+      </div>
+
+      <p class="label">ADMIN MENU</p>
+
+      <nav>
+        <a href="admin-dashboard.html"><span>▦</span> Dashboard</a>
+        <a href="admin-stock-history.html"><span>◷</span> Stock History</a>
+        <a href="admin-item-summary.html"><span>▤</span> Item Summary</a>
+        <a href="admin-product-management.html"><span>◇</span> Product Management</a>
+        <a class="active" href="admin-manage-user.html"><span>♙</span> Manage User</a>
+        <a href="admin-activity-log.html"><span>◉</span> System Activity Log</a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <span class="online-dot"></span>
+        System Online
+      </div>
+    </aside>
+
+    <main>
+      <div class="top">
+        <div>
+          <p class="page-kicker">ACCESS CONTROL</p>
+          <h1>Manage User</h1>
+          <p>Create Staff and Supervisor accounts, reset passwords, and manage access.</p>
+        </div>
+
+        <div class="user-section">
+          <span id="adminAvatar" class="profile-avatar small-avatar">A</span>
+          <span id="adminName">Admin User</span>
+          <button id="logoutButton" type="button">Logout</button>
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <section class="card">
+          <div class="card-heading">
+            <p class="card-kicker">ADMIN PROFILE</p>
+            <h2>Admin Account</h2>
+            <p>Update your login username or set a new password.</p>
+          </div>
+
+          <form id="adminAccountForm">
+            <div class="field">
+              <label for="adminUsername">Admin Username</label>
+              <input id="adminUsername" required>
+            </div>
+
+            <div class="field">
+              <label for="adminPassword">
+                New Password
+                <span class="optional">(leave blank to keep the current password)</span>
+              </label>
+
+              <div class="password-row">
+                <input
+                  id="adminPassword"
+                  type="password"
+                  placeholder="Enter a new password"
+                >
+
+                <button
+                  id="showAdminPasswordButton"
+                  type="button"
+                  class="show-password-button"
+                >
+                  Show
+                </button>
+              </div>
+            </div>
+
+            <button class="primary-button" type="submit">
+              Save Admin Account
+            </button>
+          </form>
+        </section>
+
+        <section class="card">
+          <div class="card-heading">
+            <p class="card-kicker">NEW ACCOUNT</p>
+            <h2>Add New User</h2>
+            <p>Create a Staff or Supervisor system account.</p>
+          </div>
+
+          <form id="addUserForm">
+            <div class="field">
+              <label for="newName">Full Name</label>
+              <input id="newName" required>
+            </div>
+
+            <div class="field">
+              <label for="newUsername">Username</label>
+              <input
+                id="newUsername"
+                autocomplete="off"
+                required
+              >
+            </div>
+
+            <div class="field">
+              <label for="newPassword">Temporary Password</label>
+
+              <div class="password-row">
+                <input
+                  id="newPassword"
+                  type="password"
+                  minlength="6"
+                  required
+                >
+
+                <button
+                  id="showNewPasswordButton"
+                  type="button"
+                  class="show-password-button"
+                >
+                  Show
+                </button>
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="newRole">Privilege</label>
+
+              <select id="newRole" required>
+                <option value="Staff">Staff</option>
+                <option value="Supervisor">Supervisor</option>
+              </select>
+            </div>
+
+            <button class="primary-button" type="submit">
+              Add User
+            </button>
+          </form>
+        </section>
+      </div>
+
+      <p id="message" class="message" aria-live="polite"></p>
+
+      <section class="card table-card">
+        <div class="table-heading">
+          <div>
+            <p class="card-kicker">SYSTEM ACCESS</p>
+            <h2>System Users</h2>
+            <p>Passwords are protected. Admin can reset, but cannot view, existing passwords.</p>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Username</th>
+                <th>Privilege</th>
+                <th>Account Status</th>
+                <th>New Password</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+
+            <tbody id="userTableBody"></tbody>
+          </table>
+        </div>
+
+        <p id="emptyMessage" class="empty-message">
+          No Staff or Supervisor accounts were found.
+        </p>
+      </section>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../JAVASCRIPT/admin-manage-user.js"></script>
+</body>
+</html>

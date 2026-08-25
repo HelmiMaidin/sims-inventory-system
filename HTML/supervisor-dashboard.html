@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIMS | Supervisor Dashboard</title>
+
+  <link rel="stylesheet" href="../CSS/supervisor-dashboard.css">
+</head>
+
+<body>
+  <div class="layout">
+    <aside>
+      <div class="brand">
+        <span class="brand-mark">▦</span>
+
+        <div>
+          <strong>SIMS</strong>
+          <small>Inventory System</small>
+        </div>
+      </div>
+
+      <div class="supervisor-mini-profile">
+        <span id="sidebarSupervisorAvatar" class="profile-avatar">S</span>
+
+        <div>
+          <strong id="sidebarSupervisorName">Supervisor User</strong>
+          <small>Inventory Supervisor</small>
+        </div>
+      </div>
+
+      <p class="label">SUPERVISOR MENU</p>
+
+      <nav>
+        <a class="active" href="supervisor-dashboard.html">
+          <span>▦</span> Dashboard
+        </a>
+
+        <a href="supervisor-low-stock.html">
+          <span>!</span> Low Stock Items
+        </a>
+
+        <a href="supervisor-edit-item.html">
+          <span>✎</span> Edit Item
+        </a>
+
+        <a href="supervisor-stock-history.html">
+          <span>◷</span> Stock History
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <span class="online-dot"></span>
+        System Online
+      </div>
+    </aside>
+
+    <main>
+      <div class="top">
+        <div>
+          <p class="page-kicker">INVENTORY MONITORING</p>
+          <h1>Supervisor Dashboard</h1>
+          <p>Monitor stock levels, product availability, and recent movements.</p>
+        </div>
+
+        <div class="user-section">
+          <span id="supervisorAvatar" class="profile-avatar small-avatar">S</span>
+          <span id="supervisorName">Supervisor User</span>
+          <button id="logoutButton">Logout</button>
+        </div>
+      </div>
+
+      <section class="stats">
+        <article class="stat-card red-stat">
+          <div class="stat-top">
+            <span class="stat-icon">▦</span>
+            <span class="stat-badge">Products</span>
+          </div>
+
+          <p>Total Products</p>
+          <h2 id="totalProducts">0</h2>
+          <span>Registered active items</span>
+        </article>
+
+        <article class="stat-card blue-stat">
+          <div class="stat-top">
+            <span class="stat-icon">▤</span>
+            <span class="stat-badge">Available</span>
+          </div>
+
+          <p>Total Stock Quantity</p>
+          <h2 id="totalStock">0</h2>
+          <span>Units currently available</span>
+        </article>
+
+        <article class="stat-card orange-stat">
+          <div class="stat-top">
+            <span class="stat-icon">!</span>
+            <span class="stat-badge">Attention</span>
+          </div>
+
+          <p>Low Stock Items</p>
+          <h2 id="lowStockCount">0</h2>
+          <span>At or below minimum quantity</span>
+        </article>
+
+        <article class="stat-card purple-stat">
+          <div class="stat-top">
+            <span class="stat-icon">◷</span>
+            <span class="stat-badge">Today</span>
+          </div>
+
+          <p>Today's Transactions</p>
+          <h2 id="todayTransactions">0</h2>
+          <span>Stock In, Stock Out, and new items</span>
+        </article>
+      </section>
+
+      <section class="quick-actions">
+        <div class="section-heading">
+          <div>
+            <p class="page-kicker">QUICK ACCESS</p>
+            <h2>Quick Actions</h2>
+          </div>
+        </div>
+
+        <div class="action-grid">
+          <a href="supervisor-low-stock.html" class="action-card">
+            <span class="action-icon orange">!</span>
+
+            <div>
+              <strong>Low Stock Items</strong>
+              <p>View products that need restocking and export the list.</p>
+            </div>
+
+            <span class="arrow">→</span>
+          </a>
+
+          <a href="supervisor-edit-item.html" class="action-card">
+            <span class="action-icon red">✎</span>
+
+            <div>
+              <strong>Edit Item</strong>
+              <p>Update information for existing products.</p>
+            </div>
+
+            <span class="arrow">→</span>
+          </a>
+
+          <a href="supervisor-stock-history.html" class="action-card">
+            <span class="action-icon blue">◷</span>
+
+            <div>
+              <strong>Stock History</strong>
+              <p>Review and export all inventory activity.</p>
+            </div>
+
+            <span class="arrow">→</span>
+          </a>
+        </div>
+      </section>
+
+      <section class="dashboard-grid">
+        <article class="panel">
+          <div class="panel-head">
+            <div>
+              <p class="panel-kicker">RESTOCK ALERTS</p>
+              <h2>Low Stock Items</h2>
+              <p>Products that need attention.</p>
+            </div>
+
+            <a href="supervisor-low-stock.html">View all</a>
+          </div>
+
+          <div id="lowStockList" class="list"></div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <div>
+              <p class="panel-kicker">LATEST UPDATES</p>
+              <h2>Recent Activity</h2>
+              <p>Latest inventory transactions.</p>
+            </div>
+
+            <a href="supervisor-stock-history.html">View history</a>
+          </div>
+
+          <div id="recentActivityList" class="list"></div>
+        </article>
+      </section>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../JAVASCRIPT/supervisor-dashboard.js"></script>
+</body>
+</html>

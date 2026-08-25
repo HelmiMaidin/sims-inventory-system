@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIMS | Stock In & Out</title>
+
+  <link rel="stylesheet" href="../CSS/stock-in-out.css">
+</head>
+
+<body>
+  <div class="layout">
+
+    <aside>
+      <div class="brand">
+        <span class="brand-mark">▦</span>
+        SIMS
+      </div>
+
+      <p class="label">MAIN MENU</p>
+
+      <nav>
+        <a href="#">Dashboard</a>
+        <a href="#">Products</a>
+        <a class="active" href="#">Stock In / Out</a>
+        <a href="stock-history.html">Stock History</a>
+        <a href="#">Low Stock</a>
+        <a href="#">Suppliers</a>
+        <a href="#">Users</a>
+      </nav>
+    </aside>
+
+    <main>
+      <div class="top">
+        <div>
+          <h1>Stock In / Stock Out</h1>
+          <p>Use a product barcode to record every stock movement.</p>
+        </div>
+
+        <div class="user">Admin User</div>
+      </div>
+
+      <div class="content">
+
+        <section class="card">
+          <div class="card-head">
+            <h2>Barcode Transaction</h2>
+            <p>Enter the product barcode, then select the transaction type.</p>
+          </div>
+
+          <form class="form" id="stockForm">
+
+            <label for="barcode">Barcode Number</label>
+
+            <div class="barcode-row">
+              <input
+                id="barcode"
+                type="text"
+                placeholder="Example: 9551234567890"
+              >
+
+              <button class="search" type="button">
+                Search Product
+              </button>
+            </div>
+
+            <div class="product">
+              <div class="box">▣</div>
+
+              <div>
+                <strong id="productName">Mineral Water 1.5L</strong>
+
+                <span id="productDetails">
+                  Barcode: 9551234567890 · Drinks · Unit: Bottle
+                </span>
+              </div>
+
+              <div class="stock">
+                <b id="currentStock">42</b>
+                <small>Current stock</small>
+              </div>
+            </div>
+
+            <label>Transaction Type</label>
+
+            <div class="choice">
+              <input id="in" name="type" type="radio" checked>
+              <label for="in">+ Stock In</label>
+
+              <input id="out" name="type" type="radio">
+              <label for="out">− Stock Out</label>
+            </div>
+
+            <div class="two">
+              <div class="field">
+                <label for="qty">Quantity</label>
+                <input
+                  id="qty"
+                  type="number"
+                  min="1"
+                  placeholder="Enter quantity"
+                >
+              </div>
+
+              <div class="field">
+                <label for="reason">Reason</label>
+
+                <select id="reason">
+                  <option>New supplier delivery</option>
+                  <option>Customer order / usage</option>
+                  <option>Damaged item</option>
+                  <option>Stock adjustment</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="note">Note (Optional)</label>
+
+              <textarea
+                id="note"
+                rows="3"
+                placeholder="Add a short note for this transaction"
+              ></textarea>
+            </div>
+
+            <button class="confirm" type="submit">
+              Confirm Stock Transaction
+            </button>
+
+          </form>
+        </section>
+
+        <section class="card preview-card">
+          <div class="card-head">
+            <h2>Transaction Preview</h2>
+            <p>Preview before confirming the transaction.</p>
+          </div>
+
+          <div class="summary">
+            <dl>
+              <div>
+                <dt>Product</dt>
+                <dd id="previewProduct">Mineral Water</dd>
+              </div>
+
+              <div>
+                <dt>Current Quantity</dt>
+                <dd id="previewCurrent">42 bottles</dd>
+              </div>
+
+              <div>
+                <dt>Transaction</dt>
+                <dd id="previewType">Stock In</dd>
+              </div>
+
+              <div>
+                <dt>Quantity</dt>
+                <dd id="previewQuantity">—</dd>
+              </div>
+
+              <div>
+                <dt>New Quantity</dt>
+                <dd id="previewNew">—</dd>
+              </div>
+            </dl>
+
+            <div class="hint">
+              Stock Out cannot be more than the available stock.
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <script src="../JAVASCRIPT/stock-in-out.js"></script>
+</body>
+</html>

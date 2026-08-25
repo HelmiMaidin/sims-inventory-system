@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIMS | Edit Item</title>
+
+  <link rel="stylesheet" href="../CSS/supervisor-edit-item.css">
+</head>
+
+<body>
+  <div class="layout">
+    <aside>
+      <div class="brand">
+        <span class="brand-mark">▦</span>
+
+        <div>
+          <strong>SIMS</strong>
+          <small>Inventory System</small>
+        </div>
+      </div>
+
+      <div class="supervisor-mini-profile">
+        <span id="sidebarSupervisorAvatar" class="profile-avatar">S</span>
+
+        <div>
+          <strong id="sidebarSupervisorName">Supervisor User</strong>
+          <small>Inventory Supervisor</small>
+        </div>
+      </div>
+
+      <p class="label">SUPERVISOR MENU</p>
+
+      <nav>
+        <a href="supervisor-dashboard.html">
+          <span>▦</span> Dashboard
+        </a>
+
+        <a href="supervisor-low-stock.html">
+          <span>!</span> Low Stock Items
+        </a>
+
+        <a class="active" href="supervisor-edit-item.html">
+          <span>✎</span> Edit Item
+        </a>
+
+        <a href="supervisor-stock-history.html">
+          <span>◷</span> Stock History
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <span class="online-dot"></span>
+        System Online
+      </div>
+    </aside>
+
+    <main>
+      <div class="top">
+        <div>
+          <p class="page-kicker">PRODUCT MANAGEMENT</p>
+          <h1>Edit Item</h1>
+          <p>Search for an existing item by barcode or product name, then update its details.</p>
+        </div>
+
+        <div class="user-section">
+          <span id="supervisorAvatar" class="profile-avatar small-avatar">S</span>
+          <span id="supervisorName">Supervisor User</span>
+          <button id="logoutButton">Logout</button>
+        </div>
+      </div>
+
+      <section class="card">
+        <div class="card-head">
+          <div>
+            <p class="card-kicker">PRODUCT SEARCH</p>
+            <h2>Find Existing Item</h2>
+            <p>Search using a barcode or product name. Barcode numbers cannot be changed.</p>
+          </div>
+        </div>
+
+        <div class="search-area">
+          <div class="search-field">
+            <label for="searchBarcode">Barcode Number or Product Name</label>
+
+            <div class="search-row">
+              <input
+                id="searchBarcode"
+                type="text"
+                placeholder="Enter barcode number or product name"
+                autocomplete="off"
+              >
+
+              <button id="searchButton" type="button">
+                Search Item
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <p id="searchMessage" class="message" aria-live="polite"></p>
+
+        <form id="editItemForm" class="form hidden">
+          <div class="selected-item-banner">
+            <div class="selected-icon">▦</div>
+
+            <div>
+              <span>SELECTED PRODUCT</span>
+              <strong id="selectedProductName">Product Name</strong>
+            </div>
+
+            <div class="barcode-display">
+              <span>Barcode Number</span>
+              <strong id="barcodeDisplay">-</strong>
+            </div>
+          </div>
+
+          <div class="form-heading">
+            <div>
+              <h2>Product Details</h2>
+              <p>Update the information below, then save your changes.</p>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="productName">Product Name</label>
+            <input id="productName" type="text" required>
+          </div>
+
+          <div class="two">
+            <div class="field">
+              <label for="category">Category</label>
+              <input id="category" type="text" required>
+            </div>
+
+            <div class="field">
+              <label for="unit">Unit</label>
+
+              <select id="unit" required>
+                <option value="Bottle">Bottle</option>
+                <option value="Box">Box</option>
+                <option value="Pack">Pack</option>
+                <option value="Piece">Piece</option>
+                <option value="Bag">Bag</option>
+                <option value="Can">Can</option>
+                <option value="KG">KG</option>
+                <option value="Liter">Liter</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="three">
+            <div class="field">
+              <label for="stock">Current Quantity</label>
+              <input id="stock" type="number" min="0" required>
+            </div>
+
+            <div class="field">
+              <label for="minimumStock">Minimum Quantity</label>
+              <input id="minimumStock" type="number" min="0" required>
+            </div>
+
+            <div class="field">
+              <label for="price">Unit Price (RM)</label>
+              <input id="price" type="number" min="0" step="0.01" required>
+            </div>
+          </div>
+
+          <section class="adjustment-section">
+            <div class="adjustment-head">
+              <span class="adjustment-icon">!</span>
+
+              <div>
+                <h2>Stock Quantity Adjustment</h2>
+                <p>
+                  Select a reason only when changing the current quantity.
+                  The adjustment will be recorded in Stock History.
+                </p>
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="adjustmentReason">
+                Adjustment Reason
+                <span class="optional">
+                  (required only when quantity changes)
+                </span>
+              </label>
+
+              <select id="adjustmentReason">
+                <option value="">Select adjustment reason</option>
+                <option>Physical stock count correction</option>
+                <option>Damaged or expired item</option>
+                <option>Data entry correction</option>
+                <option>Lost item</option>
+                <option>Other adjustment</option>
+              </select>
+            </div>
+
+            <div class="field no-margin">
+              <label for="adjustmentNote">
+                Adjustment Note
+                <span class="optional">(Optional)</span>
+              </label>
+
+              <textarea
+                id="adjustmentNote"
+                rows="3"
+                placeholder="Explain the stock quantity adjustment"
+              ></textarea>
+            </div>
+          </section>
+
+          <button type="submit" class="save-button">
+            Save Changes
+          </button>
+        </form>
+      </section>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../JAVASCRIPT/supervisor-edit-item.js"></script>
+</body>
+</html>

@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIMS | Staff Stock History</title>
+
+  <link rel="stylesheet" href="../CSS/staff-stock-history.css">
+</head>
+
+<body>
+  <div class="layout">
+    <aside>
+      <div class="brand">
+        <span class="brand-mark">▦</span>
+
+        <div>
+          <strong>SIMS</strong>
+          <small>Inventory System</small>
+        </div>
+      </div>
+
+      <div class="staff-mini-profile">
+        <span id="sidebarStaffAvatar" class="profile-avatar">S</span>
+
+        <div>
+          <strong id="sidebarStaffName">Staff User</strong>
+          <small>Inventory Staff</small>
+        </div>
+      </div>
+
+      <p class="label">STAFF MENU</p>
+
+      <nav>
+        <a href="staff-dashboard.html"><span>▦</span> Dashboard</a>
+        <a href="staff-stock-in-out.html"><span>↕</span> Stock In / Out</a>
+        <a href="staff-item-availability.html"><span>▣</span> Item Availability</a>
+        <a href="staff-add-item.html"><span>+</span> Add New Item</a>
+        <a class="active" href="staff-stock-history.html"><span>◷</span> Stock History</a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <span class="online-dot"></span>
+        System Online
+      </div>
+    </aside>
+
+    <main>
+      <div class="top">
+        <div>
+          <p class="page-kicker">TRANSACTION RECORDS</p>
+          <h1>Stock History</h1>
+          <p>View Stock In, Stock Out, and Add Item records. Staff cannot delete history.</p>
+        </div>
+
+        <div class="user-section">
+          <span id="staffAvatar" class="profile-avatar small-avatar">S</span>
+          <span id="staffName">Staff User</span>
+          <button id="logoutButton">Logout</button>
+        </div>
+      </div>
+
+      <section class="card">
+        <div class="card-head">
+          <div>
+            <p class="card-kicker">INVENTORY AUDIT</p>
+            <h2>Stock Transaction History</h2>
+            <p>Search or filter transaction records by a specific date, month, year, or type.</p>
+          </div>
+        </div>
+
+        <div class="filters">
+          <input
+            id="searchInput"
+            type="text"
+            placeholder="Search barcode or product name..."
+            autocomplete="off"
+          >
+
+          <input id="dateFilter" type="date">
+
+          <select id="monthFilter">
+            <option value="All">All Months</option>
+            <option value="0">January</option>
+            <option value="1">February</option>
+            <option value="2">March</option>
+            <option value="3">April</option>
+            <option value="4">May</option>
+            <option value="5">June</option>
+            <option value="6">July</option>
+            <option value="7">August</option>
+            <option value="8">September</option>
+            <option value="9">October</option>
+            <option value="10">November</option>
+            <option value="11">December</option>
+          </select>
+
+          <select id="yearFilter">
+            <option value="All">All Years</option>
+          </select>
+
+          <select id="typeFilter">
+            <option value="All">All Transactions</option>
+            <option value="Add Item">Add Item</option>
+            <option value="Stock In">Stock In</option>
+            <option value="Stock Out">Stock Out</option>
+            <option value="Stock Adjustment">Stock Adjustment</option>
+          </select>
+
+          <button id="clearFilterButton" type="button">
+            Clear Filters
+          </button>
+        </div>
+
+        <p id="resultCount" class="result-count"></p>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Date & Time</th>
+                <th>Barcode</th>
+                <th>Product Name</th>
+                <th>Transaction</th>
+                <th>Quantity</th>
+                <th>Previous Quantity</th>
+                <th>New Quantity</th>
+                <th>Reason</th>
+                <th>Note</th>
+                <th>Recorded By</th>
+              </tr>
+            </thead>
+
+            <tbody id="historyTableBody"></tbody>
+          </table>
+        </div>
+
+        <p id="emptyMessage" class="empty-message">
+          No stock transactions match the selected filters.
+        </p>
+      </section>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../JAVASCRIPT/staff-stock-history.js"></script>
+</body>
+</html>

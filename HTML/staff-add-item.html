@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIMS | Add New Item</title>
+
+  <link rel="stylesheet" href="../CSS/staff-add-item.css">
+</head>
+
+<body>
+  <div class="layout">
+    <aside>
+      <div class="brand">
+        <span class="brand-mark">▦</span>
+
+        <div>
+          <strong>SIMS</strong>
+          <small>Inventory System</small>
+        </div>
+      </div>
+
+      <div class="staff-mini-profile">
+        <span class="profile-avatar">S</span>
+
+        <div>
+          <strong>Staff User</strong>
+          <small>Inventory Staff</small>
+        </div>
+      </div>
+
+      <p class="label">STAFF MENU</p>
+
+      <nav>
+        <a href="staff-dashboard.html"><span>▦</span> Dashboard</a>
+        <a href="staff-stock-in-out.html"><span>↕</span> Stock In / Out</a>
+        <a href="staff-item-availability.html"><span>▣</span> Item Availability</a>
+        <a class="active" href="staff-add-item.html"><span>+</span> Add New Item</a>
+        <a href="staff-stock-history.html"><span>◷</span> Stock History</a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <span class="online-dot"></span>
+        System Online
+      </div>
+    </aside>
+
+    <main>
+      <div class="top">
+        <div>
+          <p class="page-kicker">PRODUCT REGISTRATION</p>
+          <h1>Add New Item</h1>
+          <p>Register an item only if its barcode does not already exist.</p>
+        </div>
+
+        <div class="user-section">
+          <span class="profile-avatar small-avatar">S</span>
+          <span id="staffName">Staff User</span>
+          <button id="logoutButton">Logout</button>
+        </div>
+      </div>
+
+      <section class="card">
+        <div class="card-head">
+          <div>
+            <p class="card-kicker">NEW PRODUCT</p>
+            <h2>New Item Details</h2>
+            <p>Use an existing supplier barcode or generate a new internal EAN-13 barcode.</p>
+          </div>
+        </div>
+
+        <form id="addItemForm" class="form">
+          <div class="field">
+            <label for="barcode">Barcode Number</label>
+
+            <div class="barcode-input-row">
+              <input
+                id="barcode"
+                type="text"
+                inputmode="numeric"
+                maxlength="13"
+                placeholder="Scan, enter, or generate 13-digit barcode"
+                required
+              >
+
+              <button type="button" id="generateBarcodeButton">
+                Generate Barcode
+              </button>
+            </div>
+
+            <small class="field-note">
+              Generate a barcode only for items without a supplier/manufacturer barcode.
+            </small>
+          </div>
+
+          <section id="barcodePreviewSection" class="barcode-preview-section">
+            <div class="barcode-preview-head">
+              <div>
+                <p class="card-kicker">BARCODE LABEL</p>
+                <h3>Generated EAN-13 Barcode</h3>
+                <p>Print this label and attach it to the item.</p>
+              </div>
+
+              <button type="button" id="printBarcodeButton">
+                Print Label
+              </button>
+            </div>
+
+            <div class="barcode-box">
+              <svg id="barcodePreview"></svg>
+            </div>
+          </section>
+
+          <div class="field">
+            <label for="productName">Product Name</label>
+            <input
+              id="productName"
+              type="text"
+              placeholder="Example: Mineral Water 1.5L"
+              required
+            >
+          </div>
+
+          <div class="two">
+            <div class="field">
+              <label for="category">Category</label>
+              <input
+                id="category"
+                type="text"
+                placeholder="Example: Drinks"
+                required
+              >
+            </div>
+
+            <div class="field">
+              <label for="unit">Unit</label>
+              <select id="unit" required>
+                <option value="">Select unit</option>
+                <option>Bottle</option>
+                <option>Box</option>
+                <option>Pack</option>
+                <option>Piece</option>
+                <option>Bag</option>
+                <option>Can</option>
+                <option>KG</option>
+                <option>Liter</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="three">
+            <div class="field">
+              <label for="stock">Current Quantity</label>
+              <input
+                id="stock"
+                type="number"
+                min="0"
+                placeholder="0"
+                required
+              >
+            </div>
+
+            <div class="field">
+              <label for="minimumStock">Minimum Quantity</label>
+              <input
+                id="minimumStock"
+                type="number"
+                min="0"
+                placeholder="0"
+                required
+              >
+            </div>
+
+            <div class="field">
+              <label for="price">Price (RM)</label>
+              <input
+                id="price"
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="0.00"
+                required
+              >
+            </div>
+          </div>
+
+          <p id="message" class="message"></p>
+
+          <button type="submit" class="save-button">
+            Add New Item
+          </button>
+        </form>
+      </section>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../JAVASCRIPT/staff-add-item.js"></script>
+</body>
+</html>

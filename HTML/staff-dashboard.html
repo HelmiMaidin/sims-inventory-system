@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIMS | Staff Dashboard</title>
+
+  <link rel="stylesheet" href="../CSS/staff-dashboard.css">
+</head>
+
+<body>
+  <div class="layout">
+    <aside>
+      <div class="brand">
+        <span class="brand-mark">▦</span>
+
+        <div>
+          <strong>SIMS</strong>
+          <small>Inventory System</small>
+        </div>
+      </div>
+
+      <div class="staff-mini-profile">
+        <span class="profile-avatar">S</span>
+
+        <div>
+          <strong>Staff User</strong>
+          <small>Inventory Staff</small>
+        </div>
+      </div>
+
+      <p class="label">STAFF MENU</p>
+
+      <nav>
+        <a class="active" href="staff-dashboard.html">
+          <span>▦</span> Dashboard
+        </a>
+
+        <a href="staff-stock-in-out.html">
+          <span>↕</span> Stock In / Out
+        </a>
+
+        <a href="staff-item-availability.html">
+          <span>▣</span> Item Availability
+        </a>
+
+        <a href="staff-add-item.html">
+          <span>+</span> Add New Item
+        </a>
+
+        <a href="staff-stock-history.html">
+          <span>◷</span> Stock History
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <span class="online-dot"></span>
+        System Online
+      </div>
+    </aside>
+
+    <main>
+      <div class="top">
+        <div>
+          <p class="page-kicker">STAFF WORKSPACE</p>
+          <h1>Staff Dashboard</h1>
+          <p>Welcome back. Here is the latest inventory summary.</p>
+        </div>
+
+        <div class="user-section">
+          <span class="profile-avatar small-avatar">S</span>
+          <span id="staffName">Staff User</span>
+          <button id="logoutButton">Logout</button>
+        </div>
+      </div>
+
+      <section class="stats">
+        <article class="stat-card purple-stat">
+          <div class="stat-top">
+            <span class="stat-icon">▤</span>
+            <span class="stat-badge">Catalog</span>
+          </div>
+
+          <p>Total Products</p>
+          <h2 id="totalProducts">0</h2>
+          <span>Registered items</span>
+        </article>
+
+        <article class="stat-card blue-stat">
+          <div class="stat-top">
+            <span class="stat-icon">▦</span>
+            <span class="stat-badge">Available</span>
+          </div>
+
+          <p>Total Stock</p>
+          <h2 id="totalStock">0</h2>
+          <span>All available units</span>
+        </article>
+
+        <article class="stat-card orange-stat">
+          <div class="stat-top">
+            <span class="stat-icon">!</span>
+            <span class="stat-badge">Attention</span>
+          </div>
+
+          <p>Low Stock Items</p>
+          <h2 id="lowStockCount">0</h2>
+          <span>Products needing attention</span>
+        </article>
+
+        <article class="stat-card green-stat">
+          <div class="stat-top">
+            <span class="stat-icon">↕</span>
+            <span class="stat-badge">Today</span>
+          </div>
+
+          <p>Today's Movements</p>
+          <h2 id="todayTransactions">0</h2>
+          <span>Stock In and Stock Out</span>
+        </article>
+      </section>
+
+      <section class="quick-actions">
+        <div class="section-heading">
+          <div>
+            <p class="page-kicker">QUICK ACCESS</p>
+            <h2>Quick Actions</h2>
+            <p>Choose an action to continue managing inventory.</p>
+          </div>
+        </div>
+
+        <div class="action-grid">
+          <a href="staff-stock-in-out.html" class="action-card">
+            <span class="action-icon blue">↕</span>
+
+            <div>
+              <strong>Stock In / Out</strong>
+              <p>Add or remove stock using a barcode.</p>
+            </div>
+
+            <span class="action-arrow">→</span>
+          </a>
+
+          <a href="staff-item-availability.html" class="action-card">
+            <span class="action-icon green">▣</span>
+
+            <div>
+              <strong>Item Availability</strong>
+              <p>Check the current quantity of an item.</p>
+            </div>
+
+            <span class="action-arrow">→</span>
+          </a>
+
+          <a href="staff-add-item.html" class="action-card">
+            <span class="action-icon orange">+</span>
+
+            <div>
+              <strong>Add New Item</strong>
+              <p>Add an item if its barcode does not exist.</p>
+            </div>
+
+            <span class="action-arrow">→</span>
+          </a>
+
+          <a href="staff-stock-history.html" class="action-card">
+            <span class="action-icon purple">◷</span>
+
+            <div>
+              <strong>Stock History</strong>
+              <p>View previous stock transactions.</p>
+            </div>
+
+            <span class="action-arrow">→</span>
+          </a>
+        </div>
+      </section>
+
+      <section class="dashboard-grid">
+        <div class="panel">
+          <div class="panel-head">
+            <div>
+              <p class="panel-kicker">STOCK ALERT</p>
+              <h2>Low Stock Items</h2>
+              <p>Products at or below their minimum stock level.</p>
+            </div>
+
+            <a href="staff-item-availability.html">View all →</a>
+          </div>
+
+          <div id="lowStockList" class="list"></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <div>
+              <p class="panel-kicker">LATEST UPDATES</p>
+              <h2>Recent Activity</h2>
+              <p>Latest stock movements.</p>
+            </div>
+
+            <a href="staff-stock-history.html">View history →</a>
+          </div>
+
+          <div id="recentActivityList" class="list"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../JAVASCRIPT/staff-dashboard.js"></script>
+</body>
+</html>

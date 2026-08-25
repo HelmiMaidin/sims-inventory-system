@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIMS | Supervisor Stock History</title>
+
+  <link rel="stylesheet" href="../CSS/supervisor-stock-history.css">
+</head>
+
+<body>
+  <div class="layout">
+    <aside>
+      <div class="brand">
+        <span class="brand-mark">▦</span>
+
+        <div>
+          <strong>SIMS</strong>
+          <small>Inventory System</small>
+        </div>
+      </div>
+
+      <div class="supervisor-mini-profile">
+        <span id="sidebarSupervisorAvatar" class="profile-avatar">S</span>
+
+        <div>
+          <strong id="sidebarSupervisorName">Supervisor User</strong>
+          <small>Inventory Supervisor</small>
+        </div>
+      </div>
+
+      <p class="label">SUPERVISOR MENU</p>
+
+      <nav>
+        <a href="supervisor-dashboard.html">
+          <span>▦</span> Dashboard
+        </a>
+
+        <a href="supervisor-low-stock.html">
+          <span>!</span> Low Stock Items
+        </a>
+
+        <a href="supervisor-edit-item.html">
+          <span>✎</span> Edit Item
+        </a>
+
+        <a class="active" href="supervisor-stock-history.html">
+          <span>◷</span> Stock History
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <span class="online-dot"></span>
+        System Online
+      </div>
+    </aside>
+
+    <main>
+      <div class="top">
+        <div>
+          <p class="page-kicker">INVENTORY AUDIT</p>
+          <h1>Stock History</h1>
+          <p>Review Stock In, Stock Out, new item, and stock adjustment records.</p>
+        </div>
+
+        <div class="user-section">
+          <span id="supervisorAvatar" class="profile-avatar small-avatar">S</span>
+          <span id="supervisorName">Supervisor User</span>
+          <button id="logoutButton" type="button">Logout</button>
+        </div>
+      </div>
+
+      <section class="card">
+        <div class="card-heading">
+          <div>
+            <p class="card-kicker">TRANSACTION RECORDS</p>
+            <h2>Stock Movement History</h2>
+            <p>Use filters to find a specific item, activity type, or date.</p>
+          </div>
+        </div>
+
+        <div class="filters">
+          <input
+            id="searchInput"
+            type="text"
+            placeholder="Search barcode or product name..."
+            autocomplete="off"
+          >
+
+          <select id="typeFilter">
+            <option value="All">All Transactions</option>
+            <option value="Add Item">Add Item</option>
+            <option value="Stock In">Stock In</option>
+            <option value="Stock Out">Stock Out</option>
+            <option value="Stock Adjustment">Stock Adjustment</option>
+          </select>
+
+          <input id="dateFilter" type="date">
+
+          <button id="clearDateButton" type="button">
+            Clear Filters
+          </button>
+        </div>
+
+        <div class="report-row">
+          <p id="resultCount">0 transaction(s) found</p>
+
+          <div class="export-buttons">
+            <button
+              id="exportExcelButton"
+              class="export-button excel-button"
+              type="button"
+            >
+              Export Excel
+            </button>
+
+            <button
+              id="exportPdfButton"
+              class="export-button pdf-button"
+              type="button"
+            >
+              Print / Save PDF
+            </button>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Date & Time</th>
+                <th>Barcode</th>
+                <th>Product Name</th>
+                <th>Transaction</th>
+                <th>Quantity</th>
+                <th>Previous Quantity</th>
+                <th>New Quantity</th>
+                <th>Reason</th>
+                <th>Note</th>
+                <th>Recorded By</th>
+              </tr>
+            </thead>
+
+            <tbody id="historyTableBody"></tbody>
+          </table>
+        </div>
+
+        <p id="emptyMessage" class="empty-message">
+          No stock transactions match your selected filters.
+        </p>
+      </section>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+  <script src="../JAVASCRIPT/supervisor-stock-history.js"></script>
+</body>
+</html>

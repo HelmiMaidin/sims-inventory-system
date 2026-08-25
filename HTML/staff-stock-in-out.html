@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIMS | Staff Stock In / Out</title>
+
+  <link rel="stylesheet" href="../CSS/staff-stock-in-out.css">
+</head>
+
+<body>
+  <div class="layout">
+    <aside>
+      <div class="brand">
+        <span class="brand-mark">▦</span>
+
+        <div>
+          <strong>SIMS</strong>
+          <small>Inventory System</small>
+        </div>
+      </div>
+
+      <div class="staff-mini-profile">
+        <span class="profile-avatar">S</span>
+
+        <div>
+          <strong id="sidebarStaffName">Staff User</strong>
+          <small>Inventory Staff</small>
+        </div>
+      </div>
+
+      <p class="label">STAFF MENU</p>
+
+      <nav>
+        <a href="staff-dashboard.html"><span>▦</span> Dashboard</a>
+        <a class="active" href="staff-stock-in-out.html"><span>↕</span> Stock In / Out</a>
+        <a href="staff-item-availability.html"><span>▣</span> Item Availability</a>
+        <a href="staff-add-item.html"><span>+</span> Add New Item</a>
+        <a href="staff-stock-history.html"><span>◷</span> Stock History</a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <span class="online-dot"></span>
+        System Online
+      </div>
+    </aside>
+
+    <main>
+      <div class="top">
+        <div>
+          <p class="page-kicker">INVENTORY MOVEMENT</p>
+          <h1>Stock In / Stock Out</h1>
+          <p>Enter or scan a barcode number to record stock movement.</p>
+        </div>
+
+        <div class="user-section">
+          <span class="profile-avatar small-avatar">S</span>
+          <span id="staffName">Staff User</span>
+          <button id="logoutButton">Logout</button>
+        </div>
+      </div>
+
+      <div class="content">
+        <section class="card transaction-card">
+          <div class="card-head">
+            <div>
+              <p class="card-kicker">BARCODE TRANSACTION</p>
+              <h2>Record Stock Movement</h2>
+              <p>Search for an existing item before recording Stock In or Stock Out.</p>
+            </div>
+          </div>
+
+          <form class="form" id="stockForm">
+            <div class="field">
+              <label for="barcode">Barcode Number</label>
+
+              <div class="barcode-row">
+                <input
+                  id="barcode"
+                  type="text"
+                  placeholder="Enter or scan barcode number"
+                  autocomplete="off"
+                >
+
+                <button class="search" type="button">
+                  Search Product
+                </button>
+              </div>
+
+              <small class="field-note">
+                Press Enter after scanning, or click Search Product.
+              </small>
+            </div>
+
+            <section class="product">
+              <span class="product-icon">▣</span>
+
+              <div class="product-info">
+                <strong id="productName">No product selected</strong>
+
+                <span id="productDetails">
+                  Enter a barcode number and click Search Product.
+                </span>
+              </div>
+
+              <div class="stock">
+                <b id="currentStock">—</b>
+                <small>Current stock</small>
+              </div>
+            </section>
+
+            <div class="transaction-label">
+              <label>Transaction Type</label>
+              <span>Choose whether stock is received or removed.</span>
+            </div>
+
+            <div class="choice">
+              <input id="in" name="type" type="radio" checked>
+              <label for="in">
+                <span class="choice-icon">+</span>
+                <span>
+                  <strong>Stock In</strong>
+                  <small>Add quantity to inventory</small>
+                </span>
+              </label>
+
+              <input id="out" name="type" type="radio">
+              <label for="out">
+                <span class="choice-icon">−</span>
+                <span>
+                  <strong>Stock Out</strong>
+                  <small>Remove quantity from inventory</small>
+                </span>
+              </label>
+            </div>
+
+            <div class="two">
+              <div class="field">
+                <label for="qty">Quantity</label>
+
+                <input
+                  id="qty"
+                  type="number"
+                  min="1"
+                  placeholder="Enter quantity"
+                >
+              </div>
+
+              <div class="field">
+                <label for="reason">Reason</label>
+
+                <select id="reason">
+                  <option>New supplier delivery</option>
+                  <option>Customer order / usage</option>
+                  <option>Damaged item</option>
+                  <option>Stock adjustment</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="note">Note <span class="optional">(Optional)</span></label>
+
+              <textarea
+                id="note"
+                rows="3"
+                placeholder="Write a short note about this transaction"
+              ></textarea>
+            </div>
+
+            <p id="transactionMessage" class="message"></p>
+
+            <button class="confirm" type="submit">
+              Confirm Stock Transaction
+            </button>
+          </form>
+        </section>
+
+        <section class="card preview-card">
+          <div class="card-head">
+            <div>
+              <p class="card-kicker">LIVE PREVIEW</p>
+              <h2>Transaction Preview</h2>
+              <p>Review the stock quantity before confirmation.</p>
+            </div>
+          </div>
+
+          <div class="summary">
+            <dl>
+              <div>
+                <dt>Product</dt>
+                <dd id="previewProduct">—</dd>
+              </div>
+
+              <div>
+                <dt>Current Quantity</dt>
+                <dd id="previewCurrent">—</dd>
+              </div>
+
+              <div>
+                <dt>Transaction</dt>
+                <dd id="previewType" class="preview-stock-in">Stock In</dd>
+              </div>
+
+              <div>
+                <dt>Quantity</dt>
+                <dd id="previewQuantity">—</dd>
+              </div>
+
+              <div class="new-quantity-row">
+                <dt>New Quantity</dt>
+                <dd id="previewNew">—</dd>
+              </div>
+            </dl>
+
+            <div class="hint">
+              <span>!</span>
+              <p>
+                The system blocks Stock Out when the requested quantity is more than the available stock.
+              </p>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../JAVASCRIPT/staff-stock-in-out.js"></script>
+</body>
+</html>

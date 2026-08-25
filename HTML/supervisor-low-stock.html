@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIMS | Low Stock Items</title>
+
+  <link rel="stylesheet" href="../CSS/supervisor-low-stock.css">
+</head>
+
+<body>
+  <div class="layout">
+    <aside>
+      <div class="brand">
+        <span class="brand-mark">▦</span>
+
+        <div>
+          <strong>SIMS</strong>
+          <small>Inventory System</small>
+        </div>
+      </div>
+
+      <div class="supervisor-mini-profile">
+        <span id="sidebarSupervisorAvatar" class="profile-avatar">S</span>
+
+        <div>
+          <strong id="sidebarSupervisorName">Supervisor User</strong>
+          <small>Inventory Supervisor</small>
+        </div>
+      </div>
+
+      <p class="label">SUPERVISOR MENU</p>
+
+      <nav>
+        <a href="supervisor-dashboard.html">
+          <span>▦</span> Dashboard
+        </a>
+
+        <a class="active" href="supervisor-low-stock.html">
+          <span>!</span> Low Stock Items
+        </a>
+
+        <a href="supervisor-edit-item.html">
+          <span>✎</span> Edit Item
+        </a>
+
+        <a href="supervisor-stock-history.html">
+          <span>◷</span> Stock History
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <span class="online-dot"></span>
+        System Online
+      </div>
+    </aside>
+
+    <main>
+      <div class="top">
+        <div>
+          <p class="page-kicker">RESTOCK MONITORING</p>
+          <h1>Low Stock Items</h1>
+          <p>Products with quantity at or below their minimum stock level.</p>
+        </div>
+
+        <div class="user-section">
+          <span id="supervisorAvatar" class="profile-avatar small-avatar">S</span>
+          <span id="supervisorName">Supervisor User</span>
+          <button id="logoutButton" type="button">Logout</button>
+        </div>
+      </div>
+
+      <section class="alert-banner">
+        <span class="alert-icon">!</span>
+
+        <div>
+          <strong>Restock attention required</strong>
+          <p>Review these products and export the list when needed.</p>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-header">
+          <div>
+            <p class="card-kicker">INVENTORY ALERT LIST</p>
+            <h2>Restock Required</h2>
+            <p id="resultCount">0 item(s) require restocking</p>
+          </div>
+
+          <div class="export-buttons">
+            <button
+              id="exportExcelButton"
+              class="export-button excel-button"
+              type="button"
+            >
+              Export Excel
+            </button>
+
+            <button
+              id="exportPdfButton"
+              class="export-button pdf-button"
+              type="button"
+            >
+              Print / Save PDF
+            </button>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Barcode</th>
+                <th>Product Name</th>
+                <th>Category</th>
+                <th>Current Quantity</th>
+                <th>Minimum Quantity</th>
+                <th>Unit</th>
+                <th>Price</th>
+                <th>Availability</th>
+              </tr>
+            </thead>
+
+            <tbody id="lowStockTableBody"></tbody>
+          </table>
+        </div>
+
+        <p id="emptyMessage" class="empty-message">
+          No low-stock items. All products have sufficient quantity.
+        </p>
+      </section>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+  <script src="../JAVASCRIPT/supervisor-low-stock.js"></script>
+</body>
+</html>

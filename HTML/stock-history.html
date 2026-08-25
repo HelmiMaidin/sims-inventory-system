@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIMS | Stock History</title>
+
+  <link rel="stylesheet" href="../CSS/stock-history.css">
+</head>
+
+<body>
+  <div class="layout">
+    <aside>
+      <div class="brand">
+        <span class="brand-mark">▦</span>
+        SIMS
+      </div>
+
+      <p class="label">MAIN MENU</p>
+
+      <nav>
+        <a href="#">Dashboard</a>
+        <a href="#">Products</a>
+        <a href="stock-in-out.html">Stock In / Out</a>
+        <a class="active" href="stock-history.html">Stock History</a>
+        <a href="#">Low Stock</a>
+        <a href="#">Suppliers</a>
+        <a href="#">Users</a>
+      </nav>
+    </aside>
+
+    <main>
+      <div class="top">
+        <div>
+          <h1>Stock History</h1>
+          <p>View all stock-in and stock-out transactions.</p>
+        </div>
+
+        <button id="clearHistoryButton" class="clear-button">
+          Clear History
+        </button>
+      </div>
+
+      <section class="card">
+        <div class="filters">
+          <input
+            type="text"
+            id="searchInput"
+            placeholder="Search barcode or product name..."
+          >
+
+          <select id="typeFilter">
+            <option value="All">All Transactions</option>
+            <option value="Stock In">Stock In</option>
+            <option value="Stock Out">Stock Out</option>
+          </select>
+        </div>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Date & Time</th>
+                <th>Barcode</th>
+                <th>Product</th>
+                <th>Type</th>
+                <th>Quantity</th>
+                <th>Previous</th>
+                <th>New Stock</th>
+                <th>Reason</th>
+                <th>Note</th>
+              </tr>
+            </thead>
+
+            <tbody id="historyTableBody"></tbody>
+          </table>
+        </div>
+
+        <p id="emptyMessage" class="empty-message">
+          No stock transactions have been recorded yet.
+        </p>
+      </section>
+    </main>
+  </div>
+
+  <script src="../JAVASCRIPT/stock-history.js"></script>
+</body>
+</html>
