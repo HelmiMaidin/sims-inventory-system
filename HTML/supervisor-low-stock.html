@@ -60,13 +60,22 @@
         <div>
           <p class="page-kicker">RESTOCK MONITORING</p>
           <h1>Low Stock Items</h1>
-          <p>Products with quantity at or below their minimum stock level.</p>
+          <p>Products with quantity below their minimum stock level.</p>
         </div>
 
         <div class="user-section">
-          <span id="supervisorAvatar" class="profile-avatar small-avatar">S</span>
+          <span
+            id="supervisorAvatar"
+            class="profile-avatar small-avatar"
+          >
+            S
+          </span>
+
           <span id="supervisorName">Supervisor User</span>
-          <button id="logoutButton" type="button">Logout</button>
+
+          <button id="logoutButton" type="button">
+            Logout
+          </button>
         </div>
       </div>
 
@@ -75,16 +84,28 @@
 
         <div>
           <strong>Restock attention required</strong>
-          <p>Review these products and export the list when needed.</p>
+          <p>Select the products to purchase, then export the selected list.</p>
         </div>
       </section>
 
       <section class="card">
         <div class="card-header">
-          <div>
+          <div class="card-information">
             <p class="card-kicker">INVENTORY ALERT LIST</p>
             <h2>Restock Required</h2>
-            <p id="resultCount">0 item(s) require restocking</p>
+
+            <p id="resultCount">
+              0 item(s) require restocking · 0 selected
+            </p>
+
+            <div class="search-wrapper">
+              <input
+                id="lowStockSearch"
+                type="search"
+                placeholder="Search by product, barcode, or category..."
+                autocomplete="off"
+              >
+            </div>
           </div>
 
           <div class="export-buttons">
@@ -93,7 +114,7 @@
               class="export-button excel-button"
               type="button"
             >
-              Export Excel
+              Export Selected Excel
             </button>
 
             <button
@@ -101,7 +122,7 @@
               class="export-button pdf-button"
               type="button"
             >
-              Print / Save PDF
+              Print / Save Selected PDF
             </button>
           </div>
         </div>
@@ -111,13 +132,22 @@
             <thead>
               <tr>
                 <th>Barcode</th>
-                <th>Product Name</th>
                 <th>Category</th>
-                <th>Current Quantity</th>
-                <th>Minimum Quantity</th>
+                <th>Product</th>
                 <th>Unit</th>
-                <th>Price</th>
-                <th>Availability</th>
+                <th>Minimum Quantity</th>
+                <th>Current Quantity</th>
+                <th>Quantity Needed</th>
+                <th>Unit Price (RM)</th>
+                <th>Total (RM)</th>
+
+                <th class="select-column">
+                  <input
+                    id="selectAllCheckbox"
+                    type="checkbox"
+                    aria-label="Select all products"
+                  >
+                </th>
               </tr>
             </thead>
 
