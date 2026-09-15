@@ -10,6 +10,8 @@ const supabaseClient = window.supabase.createClient(
 
 let currentUser = null;
 let products = [];
+let selectedProductIds = new Set();
+let searchTerm = "";
 
 const supervisorName =
   document.getElementById("supervisorName");
@@ -41,6 +43,12 @@ const exportExcelButton =
 const exportPdfButton =
   document.getElementById("exportPdfButton");
 
+const selectAllCheckbox =
+  document.getElementById("selectAllCheckbox");
+
+const lowStockSearch =
+  document.getElementById("lowStockSearch");
+
 function escapeHtml(value) {
   return String(value ?? "-")
     .replaceAll("&", "&amp;")
@@ -60,27 +68,40 @@ function getLowStockItems() {
 
       return (
         product.archived !== true &&
-        stock <= minimumStock
+        (
+          stock === 0 ||
+          (stock > 0 && stock < minimumStock)
+        )
       );
     })
     .sort(function (firstProduct, secondProduct) {
-      return Number(firstProduct.stock || 0) -
-        Number(secondProduct.stock || 0);
+      return String(firstProduct.name || "")
+        .localeCompare(
+          String(secondProduct.name || ""),
+          undefined,
+          { sensitivity: "base" }
+        );
     });
 }
 
-function getAvailability(product) {
-  if (Number(product.stock || 0) <= 0) {
-    return {
-      text: "Out of Stock",
-      className: "out-of-stock"
-    };
+function getVisibleLowStockItems() {
+  const keyword = searchTerm.trim().toLowerCase();
+
+  if (!keyword) {
+    return getLowStockItems();
   }
 
-  return {
-    text: "Low Stock",
-    className: "low-stock"
-  };
+  return getLowStockItems().filter(function (product) {
+    const searchableText = [
+      product.barcode,
+      product.category,
+      product.name
+    ]
+      .join(" ")
+      .toLowerCase();
+
+    return searchableText.includes(keyword);
+  });
 }
 
 function getRestockQuantity(product) {
@@ -97,46 +118,134 @@ function getRestockCost(product) {
     Number(product.price || 0);
 }
 
+function getSelectedLowStockItems() {
+  return getLowStockItems().filter(function (product) {
+    return selectedProductIds.has(String(product.id));
+  });
+}
+
+function updateSelectionSummary() {
+  const allLowStockItems = getLowStockItems();
+  const visibleItems = getVisibleLowStockItems();
+
+  const selectedCount =
+    getSelectedLowStockItems().length;
+
+  const selectedVisibleCount =
+    visibleItems.filter(function (product) {
+      return selectedProductIds.has(String(product.id));
+    }).length;
+
+  resultCount.textContent =
+    `${allLowStockItems.length} item(s) require restocking · ` +
+    `${selectedCount} selected`;
+
+  selectAllCheckbox.checked =
+    visibleItems.length > 0 &&
+    selectedVisibleCount === visibleItems.length;
+
+  selectAllCheckbox.indeterminate =
+    selectedVisibleCount > 0 &&
+    selectedVisibleCount < visibleItems.length;
+}
+
 function displayLowStockItems() {
-  const lowStockItems = getLowStockItems();
+  const allLowStockItems = getLowStockItems();
+  const visibleItems = getVisibleLowStockItems();
 
   lowStockTableBody.innerHTML = "";
 
-  resultCount.textContent =
-    `${lowStockItems.length} item(s) require restocking`;
+  const validIds = new Set(
+    allLowStockItems.map(function (product) {
+      return String(product.id);
+    })
+  );
 
-  if (lowStockItems.length === 0) {
+  selectedProductIds.forEach(function (productId) {
+    if (!validIds.has(productId)) {
+      selectedProductIds.delete(productId);
+    }
+  });
+
+  if (allLowStockItems.length === 0) {
+    emptyMessage.textContent =
+      "No low-stock or out-of-stock items found.";
+
     emptyMessage.style.display = "block";
+
+    selectAllCheckbox.checked = false;
+    selectAllCheckbox.indeterminate = false;
+
+    resultCount.textContent =
+      "0 item(s) require restocking · 0 selected";
+
+    return;
+  }
+
+  if (visibleItems.length === 0) {
+    emptyMessage.textContent =
+      "No matching low-stock products found.";
+
+    emptyMessage.style.display = "block";
+
+    updateSelectionSummary();
+
     return;
   }
 
   emptyMessage.style.display = "none";
 
-  lowStockItems.forEach(function (product) {
-    const availability = getAvailability(product);
+  visibleItems.forEach(function (product) {
+    const productId = String(product.id);
+
+    const isSelected =
+      selectedProductIds.has(productId);
 
     lowStockTableBody.innerHTML += `
       <tr>
         <td>${escapeHtml(product.barcode)}</td>
-        <td>${escapeHtml(product.name)}</td>
         <td>${escapeHtml(product.category)}</td>
-        <td>${Number(product.stock || 0)}</td>
-        <td>${Number(product.minimum_stock || 0)}</td>
+        <td>${escapeHtml(product.name)}</td>
         <td>${escapeHtml(product.unit)}</td>
-        <td>RM ${Number(product.price || 0).toFixed(2)}</td>
-        <td>
-          <span class="status ${availability.className}">
-            ${availability.text}
-          </span>
+        <td>${Number(product.minimum_stock || 0)}</td>
+        <td>${Number(product.stock || 0)}</td>
+        <td>${getRestockQuantity(product)}</td>
+        <td>${Number(product.price || 0).toFixed(2)}</td>
+        <td>${getRestockCost(product).toFixed(2)}</td>
+
+        <td class="select-column">
+          <input
+            class="product-select-checkbox"
+            data-product-id="${escapeHtml(productId)}"
+            type="checkbox"
+            aria-label="Select ${escapeHtml(product.name)}"
+            ${isSelected ? "checked" : ""}
+          >
         </td>
       </tr>
     `;
   });
+
+  updateSelectionSummary();
 }
 
-function downloadCsvReport(lowStockItems) {
+function getProductsToExport() {
+  const selectedItems = getSelectedLowStockItems();
+
+  if (selectedItems.length === 0) {
+    alert(
+      "Please select at least one product before exporting the report."
+    );
+
+    return null;
+  }
+
+  return selectedItems;
+}
+
+function downloadCsvReport(selectedItems) {
   let csvContent =
-    "\uFEFFSIMS Low Stock Items Report\n";
+    "\uFEFFSIMS Selected Restock Report\n";
 
   csvContent +=
     `Generated,${new Date().toLocaleString()}\n`;
@@ -145,23 +254,22 @@ function downloadCsvReport(lowStockItems) {
     `Prepared By,${currentUser.name}\n\n`;
 
   csvContent +=
-    "Barcode,Product Name,Category,Current Quantity,Minimum Quantity,Quantity Needed,Unit,Unit Price (RM),Estimated Restock Cost (RM),Availability\n";
+    "Barcode,Category,Product,Unit,Minimum Quantity,Current Quantity,Quantity Needed,Unit Price (RM),Total (RM)\n";
 
-  lowStockItems.forEach(function (product) {
+  selectedItems.forEach(function (product) {
     csvContent +=
       `"${product.barcode || "-"}",` +
-      `"${product.name || "-"}",` +
       `"${product.category || "-"}",` +
-      `"${Number(product.stock || 0)}",` +
-      `"${Number(product.minimum_stock || 0)}",` +
-      `"${getRestockQuantity(product)}",` +
+      `"${product.name || "-"}",` +
       `"${product.unit || "-"}",` +
+      `"${Number(product.minimum_stock || 0)}",` +
+      `"${Number(product.stock || 0)}",` +
+      `"${getRestockQuantity(product)}",` +
       `"${Number(product.price || 0).toFixed(2)}",` +
-      `"${getRestockCost(product).toFixed(2)}",` +
-      `"${getAvailability(product).text}"\n`;
+      `"${getRestockCost(product).toFixed(2)}"\n`;
   });
 
-  const totalRestockCost = lowStockItems.reduce(
+  const totalRestockCost = selectedItems.reduce(
     function (total, product) {
       return total + getRestockCost(product);
     },
@@ -171,10 +279,10 @@ function downloadCsvReport(lowStockItems) {
   csvContent += "\n";
 
   csvContent +=
-    `Total Low-Stock Items,${lowStockItems.length}\n`;
+    `Total Selected Products,${selectedItems.length}\n`;
 
   csvContent +=
-    `Total Estimated Restock Cost (RM),${totalRestockCost.toFixed(2)}\n`;
+    `Total Restock Amount (RM),${totalRestockCost.toFixed(2)}\n`;
 
   const file = new Blob(
     [csvContent],
@@ -186,7 +294,9 @@ function downloadCsvReport(lowStockItems) {
   link.href = URL.createObjectURL(file);
 
   link.download =
-    `SIMS_Low_Stock_Report_${new Date().toISOString().slice(0, 10)}.csv`;
+    `SIMS_Selected_Restock_Report_${
+      new Date().toISOString().slice(0, 10)
+    }.csv`;
 
   document.body.appendChild(link);
   link.click();
@@ -198,15 +308,14 @@ function downloadCsvReport(lowStockItems) {
 }
 
 function exportExcel() {
-  const lowStockItems = getLowStockItems();
+  const selectedItems = getProductsToExport();
 
-  if (lowStockItems.length === 0) {
-    alert("There are no low-stock items to export.");
+  if (!selectedItems) {
     return;
   }
 
   if (typeof XLSX === "undefined") {
-    downloadCsvReport(lowStockItems);
+    downloadCsvReport(selectedItems);
 
     alert(
       "A CSV report was downloaded because the Excel design library could not load."
@@ -216,7 +325,7 @@ function exportExcel() {
   }
 
   try {
-    const totalRestockCost = lowStockItems.reduce(
+    const totalRestockCost = selectedItems.reduce(
       function (total, product) {
         return total + getRestockCost(product);
       },
@@ -224,49 +333,47 @@ function exportExcel() {
     );
 
     const worksheetData = [
-      ["SIMS LOW STOCK ITEMS REPORT"],
-      ["Restock Monitoring Report"],
+      ["SIMS SELECTED RESTOCK REPORT"],
+      ["Selected Low Stock Items"],
       ["Generated:", new Date().toLocaleString()],
       ["Prepared by:", currentUser.name],
       [],
       [
         "Barcode",
-        "Product Name",
         "Category",
-        "Current Quantity",
-        "Minimum Quantity",
-        "Quantity Needed",
+        "Product",
         "Unit",
+        "Minimum Quantity",
+        "Current Quantity",
+        "Quantity Needed",
         "Unit Price (RM)",
-        "Estimated Restock Cost (RM)",
-        "Availability"
+        "Total (RM)"
       ]
     ];
 
-    lowStockItems.forEach(function (product) {
+    selectedItems.forEach(function (product) {
       worksheetData.push([
         product.barcode || "-",
-        product.name || "-",
         product.category || "-",
-        Number(product.stock || 0),
-        Number(product.minimum_stock || 0),
-        getRestockQuantity(product),
+        product.name || "-",
         product.unit || "-",
+        Number(product.minimum_stock || 0),
+        Number(product.stock || 0),
+        getRestockQuantity(product),
         Number(product.price || 0),
-        getRestockCost(product),
-        getAvailability(product).text
+        getRestockCost(product)
       ]);
     });
 
     worksheetData.push([]);
 
     worksheetData.push([
-      "TOTAL LOW-STOCK ITEMS",
-      lowStockItems.length
+      "TOTAL SELECTED PRODUCTS",
+      selectedItems.length
     ]);
 
     worksheetData.push([
-      "TOTAL ESTIMATED RESTOCK COST (RM)",
+      "TOTAL RESTOCK AMOUNT (RM)",
       totalRestockCost
     ]);
 
@@ -276,38 +383,28 @@ function exportExcel() {
     worksheet["!merges"] = [
       {
         s: { r: 0, c: 0 },
-        e: { r: 0, c: 9 }
+        e: { r: 0, c: 8 }
       },
       {
         s: { r: 1, c: 0 },
-        e: { r: 1, c: 9 }
+        e: { r: 1, c: 8 }
       }
     ];
 
     worksheet["!cols"] = [
       { wch: 18 },
+      { wch: 18 },
       { wch: 28 },
-      { wch: 18 },
-      { wch: 18 },
-      { wch: 18 },
-      { wch: 17 },
       { wch: 12 },
+      { wch: 18 },
+      { wch: 18 },
       { wch: 17 },
-      { wch: 29 },
+      { wch: 17 },
       { wch: 16 }
     ];
 
-    worksheet["!rows"] = [
-      { hpt: 28 },
-      { hpt: 20 },
-      { hpt: 18 },
-      { hpt: 18 },
-      { hpt: 8 },
-      { hpt: 32 }
-    ];
-
     worksheet["!autofilter"] = {
-      ref: `A6:J${6 + lowStockItems.length}`
+      ref: `A6:I${6 + selectedItems.length}`
     };
 
     const thinBorder = {
@@ -380,36 +477,6 @@ function exportExcel() {
       border: thinBorder
     };
 
-    const outOfStockStyle = {
-      font: {
-        bold: true,
-        color: { rgb: "B91C1C" }
-      },
-      fill: {
-        fgColor: { rgb: "FEE2E2" }
-      },
-      alignment: {
-        horizontal: "center",
-        vertical: "center"
-      },
-      border: thinBorder
-    };
-
-    const lowStockStyle = {
-      font: {
-        bold: true,
-        color: { rgb: "C2410C" }
-      },
-      fill: {
-        fgColor: { rgb: "FFEDD5" }
-      },
-      alignment: {
-        horizontal: "center",
-        vertical: "center"
-      },
-      border: thinBorder
-    };
-
     const summaryLabelStyle = {
       font: {
         bold: true,
@@ -438,21 +505,7 @@ function exportExcel() {
     worksheet["A1"].s = titleStyle;
     worksheet["A2"].s = subtitleStyle;
 
-    worksheet["A3"].s = {
-      font: {
-        bold: true,
-        color: { rgb: "4B5563" }
-      }
-    };
-
-    worksheet["A4"].s = {
-      font: {
-        bold: true,
-        color: { rgb: "4B5563" }
-      }
-    };
-
-    for (let column = 0; column <= 9; column++) {
+    for (let column = 0; column <= 8; column++) {
       const cell = XLSX.utils.encode_cell({
         r: 5,
         c: column
@@ -461,14 +514,14 @@ function exportExcel() {
       worksheet[cell].s = headerStyle;
     }
 
-    lowStockItems.forEach(function (product, index) {
+    selectedItems.forEach(function (product, index) {
       const row = 6 + index;
 
       const rowStyle = index % 2 === 0
         ? normalRowStyle
         : alternateRowStyle;
 
-      for (let column = 0; column <= 9; column++) {
+      for (let column = 0; column <= 8; column++) {
         const cell = XLSX.utils.encode_cell({
           r: row,
           c: column
@@ -480,29 +533,23 @@ function exportExcel() {
       const unitPriceCell =
         XLSX.utils.encode_cell({ r: row, c: 7 });
 
-      const restockCostCell =
+      const totalCell =
         XLSX.utils.encode_cell({ r: row, c: 8 });
 
-      const availabilityCell =
-        XLSX.utils.encode_cell({ r: row, c: 9 });
-
-      worksheet[unitPriceCell].z = '"RM" #,##0.00';
-
-      worksheet[restockCostCell].z = '"RM" #,##0.00';
-
-      worksheet[availabilityCell].s =
-        Number(product.stock || 0) <= 0
-          ? outOfStockStyle
-          : lowStockStyle;
+      worksheet[unitPriceCell].z = "#,##0.00";
+      worksheet[totalCell].z = "#,##0.00";
     });
 
-    const totalItemsRow = 8 + lowStockItems.length;
-    const totalCostRow = 9 + lowStockItems.length;
+    const totalProductsRow =
+      8 + selectedItems.length;
 
-    worksheet[`A${totalItemsRow}`].s =
+    const totalCostRow =
+      9 + selectedItems.length;
+
+    worksheet[`A${totalProductsRow}`].s =
       summaryLabelStyle;
 
-    worksheet[`B${totalItemsRow}`].s =
+    worksheet[`B${totalProductsRow}`].s =
       summaryValueStyle;
 
     worksheet[`A${totalCostRow}`].s =
@@ -511,23 +558,24 @@ function exportExcel() {
     worksheet[`B${totalCostRow}`].s =
       summaryValueStyle;
 
-    worksheet[`B${totalCostRow}`].z =
-      '"RM" #,##0.00';
+    worksheet[`B${totalCostRow}`].z = "#,##0.00";
 
     const workbook = XLSX.utils.book_new();
 
     XLSX.utils.book_append_sheet(
       workbook,
       worksheet,
-      "Low Stock Report"
+      "Selected Restock Report"
     );
 
     XLSX.writeFile(
       workbook,
-      `SIMS_Low_Stock_Report_${new Date().toISOString().slice(0, 10)}.xlsx`
+      `SIMS_Selected_Restock_Report_${
+        new Date().toISOString().slice(0, 10)
+      }.xlsx`
     );
   } catch (error) {
-    downloadCsvReport(lowStockItems);
+    downloadCsvReport(selectedItems);
 
     alert(
       "The styled Excel report could not be created, so SIMS downloaded a CSV report instead."
@@ -536,14 +584,13 @@ function exportExcel() {
 }
 
 function exportPdf() {
-  const lowStockItems = getLowStockItems();
+  const selectedItems = getProductsToExport();
 
-  if (lowStockItems.length === 0) {
-    alert("There are no low-stock items to print.");
+  if (!selectedItems) {
     return;
   }
 
-  const totalRestockCost = lowStockItems.reduce(
+  const totalRestockCost = selectedItems.reduce(
     function (total, product) {
       return total + getRestockCost(product);
     },
@@ -552,19 +599,18 @@ function exportPdf() {
 
   let tableRows = "";
 
-  lowStockItems.forEach(function (product) {
+  selectedItems.forEach(function (product) {
     tableRows += `
       <tr>
         <td>${escapeHtml(product.barcode)}</td>
-        <td>${escapeHtml(product.name)}</td>
         <td>${escapeHtml(product.category)}</td>
-        <td>${Number(product.stock || 0)}</td>
-        <td>${Number(product.minimum_stock || 0)}</td>
-        <td>${getRestockQuantity(product)}</td>
+        <td>${escapeHtml(product.name)}</td>
         <td>${escapeHtml(product.unit)}</td>
-        <td>RM ${Number(product.price || 0).toFixed(2)}</td>
-        <td>RM ${getRestockCost(product).toFixed(2)}</td>
-        <td>${getAvailability(product).text}</td>
+        <td>${Number(product.minimum_stock || 0)}</td>
+        <td>${Number(product.stock || 0)}</td>
+        <td>${getRestockQuantity(product)}</td>
+        <td>${Number(product.price || 0).toFixed(2)}</td>
+        <td>${getRestockCost(product).toFixed(2)}</td>
       </tr>
     `;
   });
@@ -584,11 +630,16 @@ function exportPdf() {
     <html lang="en">
     <head>
       <meta charset="UTF-8">
-      <title>SIMS Low Stock Items Report</title>
+      <title>SIMS Selected Restock Report</title>
 
       <style>
+        @page {
+          size: A4 landscape;
+          margin: 12mm;
+        }
+
         body {
-          margin: 30px;
+          margin: 0;
           color: #1f2937;
           font-family: Arial, sans-serif;
         }
@@ -619,8 +670,8 @@ function exportPdf() {
 
         th,
         td {
-          padding: 8px;
-          font-size: 11px;
+          padding: 7px;
+          font-size: 9px;
           text-align: left;
           border: 1px solid #d1d5db;
         }
@@ -633,17 +684,17 @@ function exportPdf() {
     </head>
 
     <body>
-      <h1>SIMS Low Stock Items Report</h1>
+      <h1>SIMS Selected Restock Report</h1>
 
       <p>Generated: ${new Date().toLocaleString()}</p>
       <p>Prepared by: ${escapeHtml(currentUser.name)}</p>
 
       <div class="summary">
-        <strong>Total low-stock items:</strong>
-        ${lowStockItems.length}
+        <strong>Total selected products:</strong>
+        ${selectedItems.length}
         <br>
 
-        <strong>Total estimated restock cost:</strong>
+        <strong>Total restock amount:</strong>
         RM ${totalRestockCost.toFixed(2)}
       </div>
 
@@ -651,15 +702,14 @@ function exportPdf() {
         <thead>
           <tr>
             <th>Barcode</th>
-            <th>Product Name</th>
             <th>Category</th>
-            <th>Current</th>
-            <th>Minimum</th>
-            <th>Needed</th>
+            <th>Product</th>
             <th>Unit</th>
-            <th>Unit Price</th>
-            <th>Restock Cost</th>
-            <th>Availability</th>
+            <th>Minimum Quantity</th>
+            <th>Current Quantity</th>
+            <th>Quantity Needed</th>
+            <th>Unit Price (RM)</th>
+            <th>Total (RM)</th>
           </tr>
         </thead>
 
@@ -766,7 +816,9 @@ async function initialisePage() {
   );
 
   const displayName = currentUser.name;
-  const firstLetter = displayName.charAt(0).toUpperCase();
+
+  const firstLetter =
+    displayName.charAt(0).toUpperCase();
 
   supervisorName.textContent = displayName;
   sidebarSupervisorName.textContent = displayName;
@@ -776,6 +828,47 @@ async function initialisePage() {
 
   loadProducts();
 }
+
+selectAllCheckbox.addEventListener("change", function () {
+  const visibleItems = getVisibleLowStockItems();
+
+  if (selectAllCheckbox.checked) {
+    visibleItems.forEach(function (product) {
+      selectedProductIds.add(String(product.id));
+    });
+  } else {
+    visibleItems.forEach(function (product) {
+      selectedProductIds.delete(String(product.id));
+    });
+  }
+
+  displayLowStockItems();
+});
+
+lowStockTableBody.addEventListener("change", function (event) {
+  const checkbox = event.target.closest(
+    ".product-select-checkbox"
+  );
+
+  if (!checkbox) {
+    return;
+  }
+
+  const productId = checkbox.dataset.productId;
+
+  if (checkbox.checked) {
+    selectedProductIds.add(productId);
+  } else {
+    selectedProductIds.delete(productId);
+  }
+
+  updateSelectionSummary();
+});
+
+lowStockSearch.addEventListener("input", function () {
+  searchTerm = lowStockSearch.value;
+  displayLowStockItems();
+});
 
 exportExcelButton.addEventListener("click", exportExcel);
 exportPdfButton.addEventListener("click", exportPdf);
