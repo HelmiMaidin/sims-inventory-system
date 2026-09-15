@@ -62,6 +62,30 @@ function getMinimumStock(product) {
   return Number(product.minimum_stock || 0);
 }
 
+function getLowStockItems() {
+  return products
+    .filter(function (product) {
+      const stock = getProductStock(product);
+      const minimumStock = getMinimumStock(product);
+
+      return (
+        product.archived !== true &&
+        (
+          stock === 0 ||
+          (stock > 0 && stock < minimumStock)
+        )
+      );
+    })
+    .sort(function (firstProduct, secondProduct) {
+      return String(firstProduct.name || "")
+        .localeCompare(
+          String(secondProduct.name || ""),
+          undefined,
+          { sensitivity: "base" }
+        );
+    });
+}
+
 function isToday(dateValue) {
   const date = new Date(dateValue);
 
@@ -121,11 +145,14 @@ function displayLowStock(lowStockItems) {
   }
 
   lowStockItems
-    .sort(function (firstProduct, secondProduct) {
-      return getProductStock(firstProduct) - getProductStock(secondProduct);
-    })
     .slice(0, 5)
     .forEach(function (product) {
+      const stock = getProductStock(product);
+
+      const label = stock === 0
+        ? "Out of stock"
+        : "Low stock";
+
       lowStockList.innerHTML += `
         <div class="list-item">
           <div>
@@ -134,13 +161,14 @@ function displayLowStock(lowStockItems) {
             </div>
 
             <div class="item-details">
+              ${escapeHtml(label)} ·
               Barcode: ${escapeHtml(product.barcode)} ·
               Minimum: ${getMinimumStock(product)}
             </div>
           </div>
 
           <div class="stock-number low-stock">
-            ${getProductStock(product)}
+            ${stock}
             ${escapeHtml(product.unit || "Unit")}(s)
           </div>
         </div>
@@ -195,17 +223,20 @@ function displayDashboard() {
     return product.archived !== true;
   });
 
-  const lowStockItems = activeProducts.filter(function (product) {
-    return getProductStock(product) <= getMinimumStock(product);
-  });
+  const lowStockItems = getLowStockItems();
 
-  const totalQuantity = activeProducts.reduce(function (total, product) {
-    return total + getProductStock(product);
-  }, 0);
+  const totalQuantity = activeProducts.reduce(
+    function (total, product) {
+      return total + getProductStock(product);
+    },
+    0
+  );
 
-  const movementsToday = stockHistory.filter(function (transaction) {
-    return isToday(transaction.created_at);
-  });
+  const movementsToday = stockHistory.filter(
+    function (transaction) {
+      return isToday(transaction.created_at);
+    }
+  );
 
   totalProducts.textContent = activeProducts.length;
   totalStock.textContent = totalQuantity;
@@ -251,7 +282,8 @@ async function loadDashboardData() {
 
     lowStockList.innerHTML = `
       <p class="empty">
-        Unable to load dashboard data: ${escapeHtml(error.message)}
+        Unable to load dashboard data:
+        ${escapeHtml(error.message)}
       </p>
     `;
 
@@ -320,7 +352,9 @@ async function initialisePage() {
   );
 
   const displayName = currentUser.name;
-  const firstLetter = displayName.charAt(0).toUpperCase();
+
+  const firstLetter =
+    displayName.charAt(0).toUpperCase();
 
   supervisorName.textContent = displayName;
   sidebarSupervisorName.textContent = displayName;
