@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+  <title>SIMS | Admin Low Stock Items</title>
+
+  <link rel="stylesheet" href="../CSS/admin-low-stock.css">
+</head>
+
+<body>
+  <div class="layout">
+    <aside>
+      <div class="brand">
+        <span class="brand-mark">▦</span>
+
+        <div>
+          <strong>SIMS</strong>
+          <small>Inventory System</small>
+        </div>
+      </div>
+
+      <div class="admin-mini-profile">
+        <span
+          id="sidebarAdminAvatar"
+          class="profile-avatar"
+        >
+          A
+        </span>
+
+        <div>
+          <strong id="sidebarAdminName">Admin User</strong>
+          <small>System Administrator</small>
+        </div>
+      </div>
+
+      <p class="label">ADMIN MENU</p>
+
+      <nav>
+        <a href="admin-dashboard.html">
+          <span>▦</span> Dashboard
+        </a>
+
+        <a class="active" href="admin-low-stock.html">
+          <span>!</span> Low Stock Items
+        </a>
+
+        <a href="admin-stock-history.html">
+          <span>◷</span> Stock History
+        </a>
+
+        <a href="admin-item-summary.html">
+          <span>▤</span> Item Summary
+        </a>
+
+        <a href="admin-product-management.html">
+          <span>◈</span> Product Management
+        </a>
+
+        <a href="admin-manage-user.html">
+          <span>♙</span> Manage User
+        </a>
+
+        <a href="admin-activity-log.html">
+          <span>◉</span> System Activity Log
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <span class="online-dot"></span>
+        System Online
+      </div>
+    </aside>
+
+    <main>
+      <div class="top">
+        <div>
+          <p class="page-kicker">RESTOCK MONITORING</p>
+          <h1>Low Stock Items</h1>
+          <p>Products with quantity below their minimum stock level.</p>
+        </div>
+
+        <div class="user-section">
+          <span
+            id="adminAvatar"
+            class="profile-avatar small-avatar"
+          >
+            A
+          </span>
+
+          <span id="adminName">Admin User</span>
+
+          <button id="logoutButton" type="button">
+            Logout
+          </button>
+        </div>
+      </div>
+
+      <section class="alert-banner">
+        <span class="alert-icon">!</span>
+
+        <div>
+          <strong>Restock attention required</strong>
+          <p>Select products to purchase, then export the selected list.</p>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-header">
+          <div class="card-information">
+            <p class="card-kicker">INVENTORY ALERT LIST</p>
+            <h2>Restock Required</h2>
+
+            <p id="resultCount">
+              0 item(s) require restocking · 0 selected
+            </p>
+
+            <div class="search-wrapper">
+              <input
+                id="lowStockSearch"
+                type="search"
+                placeholder="Search by product, barcode, or category..."
+                autocomplete="off"
+              >
+            </div>
+          </div>
+
+          <div class="export-buttons">
+            <button
+              id="exportExcelButton"
+              class="export-button excel-button"
+              type="button"
+            >
+              Export Selected Excel
+            </button>
+
+            <button
+              id="exportPdfButton"
+              class="export-button pdf-button"
+              type="button"
+            >
+              Print / Save Selected PDF
+            </button>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Barcode</th>
+                <th>Category</th>
+                <th>Product</th>
+                <th>Unit</th>
+                <th>Minimum Quantity</th>
+                <th>Current Quantity</th>
+                <th>Quantity Needed</th>
+                <th>Unit Price (RM)</th>
+                <th>Total (RM)</th>
+
+                <th class="select-column">
+                  <input
+                    id="selectAllCheckbox"
+                    type="checkbox"
+                    aria-label="Select all products"
+                  >
+                </th>
+              </tr>
+            </thead>
+
+            <tbody id="lowStockTableBody"></tbody>
+          </table>
+        </div>
+
+        <div class="selected-summary">
+          <div>
+            <span>Total Items Selected</span>
+            <strong id="selectedQuantityTotal">0</strong>
+          </div>
+
+          <div>
+            <span>Total Price Selected</span>
+            <strong id="selectedPriceTotal">RM 0.00</strong>
+          </div>
+        </div>
+
+        <p id="emptyMessage" class="empty-message">
+          No low-stock items. All products have sufficient quantity.
+        </p>
+      </section>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+
+  <script src="../JAVASCRIPT/admin-low-stock.js"></script>
+</body>
+</html>
