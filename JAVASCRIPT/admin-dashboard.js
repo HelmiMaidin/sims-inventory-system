@@ -17,16 +17,27 @@ let movementChart = null;
 let categoryChart = null;
 
 const adminName = document.getElementById("adminName");
-const sidebarAdminName = document.getElementById("sidebarAdminName");
-const welcomeName = document.getElementById("welcomeName");
 
-const adminAvatar = document.getElementById("adminAvatar");
+const sidebarAdminName =
+  document.getElementById("sidebarAdminName");
+
+const welcomeName =
+  document.getElementById("welcomeName");
+
+const adminAvatar =
+  document.getElementById("adminAvatar");
+
 const sidebarAdminAvatar =
   document.getElementById("sidebarAdminAvatar");
 
-const currentDate = document.getElementById("currentDate");
-const currentTime = document.getElementById("currentTime");
-const logoutButton = document.getElementById("logoutButton");
+const currentDate =
+  document.getElementById("currentDate");
+
+const currentTime =
+  document.getElementById("currentTime");
+
+const logoutButton =
+  document.getElementById("logoutButton");
 
 function escapeHtml(value) {
   return String(value ?? "-")
@@ -66,9 +77,22 @@ function getPrice(product) {
   return Number(product.price || 0);
 }
 
+function isLowStock(product) {
+  const stock = getStock(product);
+  const minimumStock = getMinimumStock(product);
+
+  return (
+    stock === 0 ||
+    (stock > 0 && stock < minimumStock)
+  );
+}
+
 function displayLowStockItems(lowStockItems) {
-  const lowStockList = document.getElementById("lowStockList");
-  const alertCount = document.getElementById("alertCount");
+  const lowStockList =
+    document.getElementById("lowStockList");
+
+  const alertCount =
+    document.getElementById("alertCount");
 
   alertCount.textContent = lowStockItems.length;
   lowStockList.innerHTML = "";
@@ -80,12 +104,17 @@ function displayLowStockItems(lowStockItems) {
         No products currently need restocking.
       </p>
     `;
+
     return;
   }
 
   lowStockItems
     .sort(function (first, second) {
-      return getStock(first) - getStock(second);
+      return String(first.name || "").localeCompare(
+        String(second.name || ""),
+        undefined,
+        { sensitivity: "base" }
+      );
     })
     .slice(0, 4)
     .forEach(function (product) {
@@ -95,7 +124,10 @@ function displayLowStockItems(lowStockItems) {
 
           <div class="low-stock-info">
             <strong>${escapeHtml(product.name)}</strong>
-            <small>${escapeHtml(product.category || "Uncategorized")}</small>
+
+            <small>
+              ${escapeHtml(product.category || "Uncategorized")}
+            </small>
           </div>
 
           <span class="stock-number">
@@ -112,18 +144,21 @@ function createAvailabilityChart(productList) {
   }
 
   const available = productList.filter(function (product) {
-    return getStock(product) > getMinimumStock(product);
+    return getStock(product) >= getMinimumStock(product);
   }).length;
 
   const lowStock = productList.filter(function (product) {
+    const stock = getStock(product);
+    const minimumStock = getMinimumStock(product);
+
     return (
-      getStock(product) > 0 &&
-      getStock(product) <= getMinimumStock(product)
+      stock > 0 &&
+      stock < minimumStock
     );
   }).length;
 
   const outOfStock = productList.filter(function (product) {
-    return getStock(product) <= 0;
+    return getStock(product) === 0;
   }).length;
 
   availabilityChart = new Chart(
@@ -133,6 +168,7 @@ function createAvailabilityChart(productList) {
 
       data: {
         labels: ["Available", "Low Stock", "Out of Stock"],
+
         datasets: [{
           data: [available, lowStock, outOfStock],
           backgroundColor: ["#22c55e", "#f97316", "#dc2626"],
@@ -150,6 +186,7 @@ function createAvailabilityChart(productList) {
         plugins: {
           legend: {
             position: "bottom",
+
             labels: {
               usePointStyle: true,
               padding: 18
@@ -185,6 +222,7 @@ function createMovementChart() {
 
       data: {
         labels: ["Stock In", "Stock Out", "Adjustment"],
+
         datasets: [{
           label: "Transactions",
           data: [stockIn, stockOut, adjustments],
@@ -226,7 +264,8 @@ function createCategoryChart(productList) {
   const categoryData = {};
 
   productList.forEach(function (product) {
-    const category = product.category || "Uncategorized";
+    const category =
+      product.category || "Uncategorized";
 
     if (!categoryData[category]) {
       categoryData[category] = 0;
@@ -245,6 +284,7 @@ function createCategoryChart(productList) {
 
       data: {
         labels: categories,
+
         datasets: [{
           label: "Current Stock Quantity",
           data: quantities,
@@ -283,16 +323,22 @@ function displayDashboard() {
     return product.archived !== true;
   });
 
-  const totalQuantity = activeProducts.reduce(function (total, product) {
-    return total + getStock(product);
-  }, 0);
+  const totalQuantity = activeProducts.reduce(
+    function (total, product) {
+      return total + getStock(product);
+    },
+    0
+  );
 
-  const inventoryValue = activeProducts.reduce(function (total, product) {
-    return total + (getStock(product) * getPrice(product));
-  }, 0);
+  const inventoryValue = activeProducts.reduce(
+    function (total, product) {
+      return total + (getStock(product) * getPrice(product));
+    },
+    0
+  );
 
   const lowStockItems = activeProducts.filter(function (product) {
-    return getStock(product) <= getMinimumStock(product);
+    return isLowStock(product);
   });
 
   document.getElementById("totalProducts").textContent =
@@ -329,12 +375,18 @@ async function loadDashboardData() {
   ]);
 
   if (productsResult.error) {
-    alert(`Unable to load products: ${productsResult.error.message}`);
+    alert(
+      `Unable to load products: ${productsResult.error.message}`
+    );
+
     return;
   }
 
   if (historyResult.error) {
-    alert(`Unable to load stock history: ${historyResult.error.message}`);
+    alert(
+      `Unable to load stock history: ${historyResult.error.message}`
+    );
+
     return;
   }
 
@@ -357,7 +409,8 @@ async function logout() {
 }
 
 async function initialisePage() {
-  const { data, error } = await supabaseClient.auth.getSession();
+  const { data, error } =
+    await supabaseClient.auth.getSession();
 
   if (error || !data.session) {
     window.location.href = "login.html";
@@ -378,7 +431,9 @@ async function initialisePage() {
     profile.role !== "Admin"
   ) {
     await supabaseClient.auth.signOut();
+
     localStorage.removeItem("currentUser");
+
     window.location.href = "login.html";
     return;
   }
@@ -395,8 +450,11 @@ async function initialisePage() {
     JSON.stringify(currentUser)
   );
 
-  const firstName = currentUser.name.split(" ")[0] || "Admin";
-  const initial = firstName.charAt(0).toUpperCase() || "A";
+  const firstName =
+    currentUser.name.split(" ")[0] || "Admin";
+
+  const initial =
+    firstName.charAt(0).toUpperCase() || "A";
 
   adminName.textContent = currentUser.name;
   sidebarAdminName.textContent = currentUser.name;
