@@ -1,4 +1,5 @@
-const SUPABASE_URL = "https://ocycijajjkqfsrcnpbmn.supabase.co";
+const SUPABASE_URL =
+  "https://ocycijajjkqfsrcnpbmn.supabase.co";
 
 const SUPABASE_PUBLISHABLE_KEY =
   "sb_publishable_EDDbsmJyHARgnhGsQ_dcjA_HHItlr8T";
@@ -48,6 +49,12 @@ const selectAllCheckbox =
 
 const lowStockSearch =
   document.getElementById("lowStockSearch");
+
+const selectedQuantityTotal =
+  document.getElementById("selectedQuantityTotal");
+
+const selectedPriceTotal =
+  document.getElementById("selectedPriceTotal");
 
 function escapeHtml(value) {
   return String(value ?? "-")
@@ -128,17 +135,30 @@ function updateSelectionSummary() {
   const allLowStockItems = getLowStockItems();
   const visibleItems = getVisibleLowStockItems();
 
-  const selectedCount =
-    getSelectedLowStockItems().length;
+  const selectedItems =
+    getSelectedLowStockItems();
+
+  const selectedCount = selectedItems.length;
 
   const selectedVisibleCount =
     visibleItems.filter(function (product) {
       return selectedProductIds.has(String(product.id));
     }).length;
 
+  const totalSelectedPrice =
+    selectedItems.reduce(function (total, product) {
+      return total + getRestockCost(product);
+    }, 0);
+
   resultCount.textContent =
     `${allLowStockItems.length} item(s) require restocking · ` +
     `${selectedCount} selected`;
+
+  selectedQuantityTotal.textContent =
+    selectedCount;
+
+  selectedPriceTotal.textContent =
+    `RM ${totalSelectedPrice.toFixed(2)}`;
 
   selectAllCheckbox.checked =
     visibleItems.length > 0 &&
@@ -168,16 +188,14 @@ function displayLowStockItems() {
   });
 
   if (allLowStockItems.length === 0) {
+    selectedProductIds.clear();
+
     emptyMessage.textContent =
       "No low-stock or out-of-stock items found.";
 
     emptyMessage.style.display = "block";
 
-    selectAllCheckbox.checked = false;
-    selectAllCheckbox.indeterminate = false;
-
-    resultCount.textContent =
-      "0 item(s) require restocking · 0 selected";
+    updateSelectionSummary();
 
     return;
   }
