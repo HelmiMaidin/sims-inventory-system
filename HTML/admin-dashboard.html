@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
   <title>SIMS | Admin Dashboard</title>
 
   <link rel="stylesheet" href="../CSS/admin-dashboard.css">
@@ -22,7 +25,12 @@
       </div>
 
       <div class="admin-mini-profile">
-        <span id="sidebarAdminAvatar" class="profile-avatar">A</span>
+        <span
+          id="sidebarAdminAvatar"
+          class="profile-avatar"
+        >
+          A
+        </span>
 
         <div>
           <strong id="sidebarAdminName">Admin User</strong>
@@ -33,12 +41,33 @@
       <p class="label">ADMIN MENU</p>
 
       <nav>
-        <a class="active" href="admin-dashboard.html"><span>▦</span> Dashboard</a>
-        <a href="admin-stock-history.html"><span>◷</span> Stock History</a>
-        <a href="admin-item-summary.html"><span>▤</span> Item Summary</a>
-        <a href="admin-product-management.html"><span>◈</span> Product Management</a>
-        <a href="admin-manage-user.html"><span>♙</span> Manage User</a>
-        <a href="admin-activity-log.html"><span>◉</span> System Activity Log</a>
+        <a class="active" href="admin-dashboard.html">
+          <span>▦</span> Dashboard
+        </a>
+
+        <a href="admin-low-stock.html">
+          <span>!</span> Low Stock Items
+        </a>
+
+        <a href="admin-stock-history.html">
+          <span>◷</span> Stock History
+        </a>
+
+        <a href="admin-item-summary.html">
+          <span>▤</span> Item Summary
+        </a>
+
+        <a href="admin-product-management.html">
+          <span>◈</span> Product Management
+        </a>
+
+        <a href="admin-manage-user.html">
+          <span>♙</span> Manage User
+        </a>
+
+        <a href="admin-activity-log.html">
+          <span>◉</span> System Activity Log
+        </a>
       </nav>
 
       <div class="sidebar-footer">
@@ -51,7 +80,12 @@
       <div class="top">
         <div>
           <p class="page-kicker">SIMS COMMAND CENTRE</p>
-          <h1>Welcome back, <span id="welcomeName">Admin</span> 👋</h1>
+          <h1>
+            Welcome back,
+            <span id="welcomeName">Admin</span>
+            👋
+          </h1>
+
           <p>Here is your live inventory overview for today.</p>
         </div>
 
@@ -66,9 +100,18 @@
           </div>
 
           <div class="user-section">
-            <span id="adminAvatar" class="profile-avatar small-avatar">A</span>
+            <span
+              id="adminAvatar"
+              class="profile-avatar small-avatar"
+            >
+              A
+            </span>
+
             <span id="adminName">Admin User</span>
-            <button id="logoutButton">Logout</button>
+
+            <button id="logoutButton" type="button">
+              Logout
+            </button>
           </div>
         </div>
       </div>
@@ -79,6 +122,7 @@
             <span class="stat-icon">◈</span>
             <span class="stat-badge">Catalogue</span>
           </div>
+
           <p>Total Products</p>
           <h2 id="totalProducts">0</h2>
           <span>All registered products</span>
@@ -89,6 +133,7 @@
             <span class="stat-icon">▤</span>
             <span class="stat-badge">Available</span>
           </div>
+
           <p>Total Quantity</p>
           <h2 id="totalQuantity">0</h2>
           <span>Current available units</span>
@@ -99,6 +144,7 @@
             <span class="stat-icon">RM</span>
             <span class="stat-badge">Asset Value</span>
           </div>
+
           <p>Inventory Value</p>
           <h2 id="inventoryValue">RM 0.00</h2>
           <span>Current stock × item price</span>
@@ -109,37 +155,55 @@
             <span class="stat-icon">!</span>
             <span class="stat-badge alert-badge">Attention</span>
           </div>
+
           <p>Low Stock Items</p>
           <h2 id="lowStockCount">0</h2>
-          <span>Require restocking attention</span>
+          <span>Below minimum quantity or out of stock</span>
         </article>
       </section>
 
       <section class="quick-actions">
+        <a href="admin-low-stock.html" class="action-card">
+          <span class="action-icon pink">!</span>
+
+          <div>
+            <strong>Low Stock Items</strong>
+            <p>Review products that require restocking.</p>
+          </div>
+
+          <span class="arrow">→</span>
+        </a>
+
         <a href="admin-stock-history.html" class="action-card">
           <span class="action-icon pink">◷</span>
+
           <div>
             <strong>Stock History</strong>
             <p>View every inventory transaction.</p>
           </div>
+
           <span class="arrow">→</span>
         </a>
 
         <a href="admin-item-summary.html" class="action-card">
           <span class="action-icon blue">▤</span>
+
           <div>
             <strong>Item Summary</strong>
             <p>Review item and spending reports.</p>
           </div>
+
           <span class="arrow">→</span>
         </a>
 
         <a href="admin-manage-user.html" class="action-card">
           <span class="action-icon purple">♙</span>
+
           <div>
             <strong>Manage User</strong>
             <p>Create users and set privileges.</p>
           </div>
+
           <span class="arrow">→</span>
         </a>
       </section>
@@ -171,8 +235,8 @@
 
           <div id="lowStockList" class="low-stock-list"></div>
 
-          <a href="admin-product-management.html" class="view-all-link">
-            Manage products →
+          <a href="admin-low-stock.html" class="view-all-link">
+            View low-stock items →
           </a>
         </section>
       </section>
