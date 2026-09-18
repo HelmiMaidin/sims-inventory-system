@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SIMS | Manage User</title>
+  <title>SIMS | Product Management</title>
 
-  <link rel="stylesheet" href="../CSS/admin-manage-user.css">
+  <link rel="stylesheet" href="../CSS/admin-product-management.css">
 </head>
 
 <body>
@@ -48,11 +48,11 @@
           <span>▤</span> Item Summary
         </a>
 
-        <a href="admin-product-management.html">
+        <a class="active" href="admin-product-management.html">
           <span>◇</span> Product Management
         </a>
 
-        <a class="active" href="admin-manage-user.html">
+        <a href="admin-manage-user.html">
           <span>♙</span> Manage User
         </a>
 
@@ -70,9 +70,9 @@
     <main>
       <div class="top">
         <div>
-          <p class="page-kicker">ACCESS CONTROL</p>
-          <h1>Manage User</h1>
-          <p>Create Staff and Supervisor accounts, reset passwords, and manage access.</p>
+          <p class="page-kicker">PRODUCT CATALOGUE</p>
+          <h1>Product Management</h1>
+          <p>Archive or restore products without deleting their historical records.</p>
         </div>
 
         <div class="user-section">
@@ -82,144 +82,61 @@
         </div>
       </div>
 
-      <div class="form-grid">
-        <section class="card">
-          <div class="card-heading">
-            <p class="card-kicker">ADMIN PROFILE</p>
-            <h2>Admin Account</h2>
-            <p>Update your login username or set a new password.</p>
-          </div>
-
-          <form id="adminAccountForm">
-            <div class="field">
-              <label for="adminUsername">Admin Username</label>
-              <input id="adminUsername" required>
-            </div>
-
-            <div class="field">
-              <label for="adminPassword">
-                New Password
-                <span class="optional">(leave blank to keep the current password)</span>
-              </label>
-
-              <div class="password-row">
-                <input
-                  id="adminPassword"
-                  type="password"
-                  placeholder="Enter a new password"
-                >
-
-                <button
-                  id="showAdminPasswordButton"
-                  type="button"
-                  class="show-password-button"
-                >
-                  Show
-                </button>
-              </div>
-            </div>
-
-            <button class="primary-button" type="submit">
-              Save Admin Account
-            </button>
-          </form>
-        </section>
-
-        <section class="card">
-          <div class="card-heading">
-            <p class="card-kicker">NEW ACCOUNT</p>
-            <h2>Add New User</h2>
-            <p>Create a Staff or Supervisor system account.</p>
-          </div>
-
-          <form id="addUserForm">
-            <div class="field">
-              <label for="newName">Full Name</label>
-              <input id="newName" required>
-            </div>
-
-            <div class="field">
-              <label for="newUsername">Username</label>
-              <input
-                id="newUsername"
-                autocomplete="off"
-                required
-              >
-            </div>
-
-            <div class="field">
-              <label for="newPassword">Temporary Password</label>
-
-              <div class="password-row">
-                <input
-                  id="newPassword"
-                  type="password"
-                  minlength="6"
-                  required
-                >
-
-                <button
-                  id="showNewPasswordButton"
-                  type="button"
-                  class="show-password-button"
-                >
-                  Show
-                </button>
-              </div>
-            </div>
-
-            <div class="field">
-              <label for="newRole">Privilege</label>
-
-              <select id="newRole" required>
-                <option value="Staff">Staff</option>
-                <option value="Supervisor">Supervisor</option>
-              </select>
-            </div>
-
-            <button class="primary-button" type="submit">
-              Add User
-            </button>
-          </form>
-        </section>
-      </div>
-
-      <p id="message" class="message" aria-live="polite"></p>
-
-      <section class="card table-card">
-        <div class="table-heading">
+      <section class="card">
+        <div class="card-heading">
           <div>
-            <p class="card-kicker">SYSTEM ACCESS</p>
-            <h2>System Users</h2>
-            <p>Passwords are protected. Admin can reset, but cannot view, existing passwords.</p>
+            <p class="card-kicker">INVENTORY PRODUCTS</p>
+            <h2>Manage Product Records</h2>
+            <p>Search products and manage their active or archived status.</p>
           </div>
         </div>
+
+        <div class="filters">
+          <input
+            id="searchInput"
+            type="text"
+            placeholder="Search barcode, product name, or category..."
+            autocomplete="off"
+          >
+
+          <select id="statusFilter">
+            <option value="All">All Products</option>
+            <option value="Active">Active Products</option>
+            <option value="Archived">Archived Products</option>
+          </select>
+        </div>
+
+        <p id="resultCount" class="result-count"></p>
 
         <div class="table-container">
           <table>
             <thead>
               <tr>
-                <th>Name</th>
-                <th>Username</th>
-                <th>Privilege</th>
-                <th>Account Status</th>
-                <th>New Password</th>
+                <th>Barcode</th>
+                <th>Product Name</th>
+                <th>Category</th>
+                <th>Current Quantity</th>
+                <th>Minimum Quantity</th>
+                <th>Unit</th>
+                <th>Price</th>
+                <th>Status</th>
+                <th>Last Edited</th>
                 <th>Action</th>
               </tr>
             </thead>
 
-            <tbody id="userTableBody"></tbody>
+            <tbody id="productTableBody"></tbody>
           </table>
         </div>
 
         <p id="emptyMessage" class="empty-message">
-          No Staff or Supervisor accounts were found.
+          No product was found.
         </p>
       </section>
     </main>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="../JAVASCRIPT/admin-manage-user.js"></script>
+  <script src="../JAVASCRIPT/admin-product-management.js"></script>
 </body>
 </html>
