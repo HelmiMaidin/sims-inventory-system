@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>SIMS | Saved Restock Lists</title>
+
+  <link rel="stylesheet" href="../CSS/admin-saved-restock-lists.css">
+</head>
+
+<body>
+  <div class="layout">
+    <aside>
+      <div class="brand">
+        <span class="brand-mark">▦</span>
+
+        <div>
+          <strong>SIMS</strong>
+          <small>Inventory System</small>
+        </div>
+      </div>
+
+      <div class="admin-mini-profile">
+        <span
+          id="sidebarAdminAvatar"
+          class="profile-avatar"
+        >
+          A
+        </span>
+
+        <div>
+          <strong id="sidebarAdminName">Admin User</strong>
+          <small>System Administrator</small>
+        </div>
+      </div>
+
+      <p class="label">ADMIN MENU</p>
+
+      <nav>
+        <a href="admin-dashboard.html">
+          <span>▦</span> Dashboard
+        </a>
+
+        <a href="admin-low-stock.html">
+          <span>!</span> Low Stock Items
+        </a>
+
+        <a
+          class="active"
+          href="admin-saved-restock-lists.html"
+        >
+          <span>▤</span> Saved Restock Lists
+        </a>
+
+        <a href="admin-stock-history.html">
+          <span>◷</span> Stock History
+        </a>
+
+        <a href="admin-item-summary.html">
+          <span>▤</span> Item Summary
+        </a>
+
+        <a href="admin-product-management.html">
+          <span>◇</span> Product Management
+        </a>
+
+        <a href="admin-manage-user.html">
+          <span>♙</span> Manage User
+        </a>
+
+        <a href="admin-activity-log.html">
+          <span>◉</span> System Activity Log
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <span class="online-dot"></span>
+        System Online
+      </div>
+    </aside>
+
+    <main>
+      <div class="top">
+        <div>
+          <p class="page-kicker">SAVED FILES</p>
+
+          <h1>Saved Restock Lists</h1>
+
+          <p>
+            View, download, and manage saved low-stock purchase lists.
+          </p>
+        </div>
+
+        <div class="user-section">
+          <span
+            id="adminAvatar"
+            class="profile-avatar small-avatar"
+          >
+            A
+          </span>
+
+          <span id="adminName">Admin User</span>
+
+          <button id="logoutButton" type="button">
+            Logout
+          </button>
+        </div>
+      </div>
+
+      <section class="folder-section">
+        <p class="page-kicker">FILE ARCHIVE</p>
+
+        <h2>Folders</h2>
+
+        <button
+          id="restockFolderButton"
+          class="folder-card active-folder"
+          type="button"
+        >
+          <span class="folder-icon">▰</span>
+
+          <div>
+            <strong>Restock Lists</strong>
+
+            <small>
+              Saved low-stock purchase lists from Supervisors and Admins.
+            </small>
+          </div>
+
+          <span id="folderItemCount">0 Saved Lists</span>
+
+          <span class="folder-arrow">→</span>
+        </button>
+      </section>
+
+      <section class="card">
+        <div class="card-heading">
+          <div>
+            <p class="card-kicker">RESTOCK LIST ARCHIVE</p>
+
+            <h2>Saved Restock List Files</h2>
+
+            <p id="resultCount" class="result-count">
+              0 saved list(s) shown · 0 selected
+            </p>
+          </div>
+
+          <button
+            id="deleteSelectedButton"
+            class="delete-selected-button"
+            type="button"
+            disabled
+          >
+            Delete Selected Lists
+          </button>
+        </div>
+
+        <div class="filters">
+          <input
+            id="searchInput"
+            type="search"
+            placeholder="Search saved list name or saved by..."
+            autocomplete="off"
+          >
+
+          <input id="dateFilter" type="date">
+
+          <button id="clearFiltersButton" type="button">
+            Clear Filters
+          </button>
+        </div>
+
+        <p id="message" class="message"></p>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Saved File</th>
+                <th>Saved By</th>
+                <th>Saved Date &amp; Time</th>
+                <th>Items</th>
+                <th>Estimated Total</th>
+                <th>Open</th>
+                <th>PDF</th>
+
+                <th class="select-column">
+                  <input
+                    id="selectAllCheckbox"
+                    type="checkbox"
+                    aria-label="Select all saved lists"
+                  >
+                </th>
+              </tr>
+            </thead>
+
+            <tbody id="restockListTableBody"></tbody>
+          </table>
+        </div>
+
+        <p id="emptyMessage" class="empty-message">
+          No saved restock lists found.
+        </p>
+      </section>
+    </main>
+  </div>
+
+  <div
+    id="restockDetailsModal"
+    class="modal"
+    aria-hidden="true"
+  >
+    <div
+      class="modal-backdrop"
+      data-close-modal="true"
+    ></div>
+
+    <section
+      class="modal-content"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modalTitle"
+    >
+      <div class="modal-header">
+        <div>
+          <p class="card-kicker">SAVED PURCHASE LIST</p>
+          <h2 id="modalTitle">Restock List</h2>
+          <p>Saved product details and restock estimates.</p>
+        </div>
+
+        <button
+          id="closeModalButton"
+          class="close-modal-button"
+          type="button"
+          aria-label="Close saved list details"
+        >
+          ×
+        </button>
+      </div>
+
+      <div id="modalDetails" class="modal-details"></div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Barcode</th>
+              <th>Category</th>
+              <th>Product</th>
+              <th>Unit</th>
+              <th>Minimum Quantity</th>
+              <th>Current Quantity</th>
+              <th>Quantity Needed</th>
+              <th>Unit Price (RM)</th>
+              <th>Total (RM)</th>
+            </tr>
+          </thead>
+
+          <tbody id="restockItemTableBody"></tbody>
+        </table>
+      </div>
+
+      <div class="modal-summary">
+        <span>
+          Total Items:
+          <strong id="modalItemCount">0 item(s)</strong>
+        </span>
+
+        <span>
+          Estimated Total:
+          <strong id="modalTotalPrice">RM 0.00</strong>
+        </span>
+      </div>
+    </section>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script src="../JAVASCRIPT/admin-saved-restock-lists.js"></script>
+</body>
+</html>
