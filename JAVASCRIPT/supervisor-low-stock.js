@@ -1,5 +1,4 @@
-const SUPABASE_URL =
-  "https://ocycijajjkqfsrcnpbmn.supabase.co";
+const SUPABASE_URL = "https://ocycijajjkqfsrcnpbmn.supabase.co";
 
 const SUPABASE_PUBLISHABLE_KEY =
   "sb_publishable_EDDbsmJyHARgnhGsQ_dcjA_HHItlr8T";
@@ -12,52 +11,75 @@ const supabaseClient = window.supabase.createClient(
 let currentUser = null;
 let products = [];
 let selectedProductIds = new Set();
-let searchTerm = "";
 
-const supervisorName =
-  document.getElementById("supervisorName");
+let sortKey = "";
+let sortDirection = "asc";
 
-const sidebarSupervisorName =
-  document.getElementById("sidebarSupervisorName");
+const supervisorName = document.getElementById("supervisorName");
+const sidebarSupervisorName = document.getElementById(
+  "sidebarSupervisorName"
+);
 
-const supervisorAvatar =
-  document.getElementById("supervisorAvatar");
+const supervisorAvatar = document.getElementById(
+  "supervisorAvatar"
+);
 
-const sidebarSupervisorAvatar =
-  document.getElementById("sidebarSupervisorAvatar");
+const sidebarSupervisorAvatar = document.getElementById(
+  "sidebarSupervisorAvatar"
+);
 
-const logoutButton =
-  document.getElementById("logoutButton");
+const logoutButton = document.getElementById("logoutButton");
+const lowStockSearch = document.getElementById("lowStockSearch");
+const lowStockTableBody = document.getElementById("lowStockTableBody");
+const resultCount = document.getElementById("resultCount");
+const emptyMessage = document.getElementById("emptyMessage");
 
-const lowStockTableBody =
-  document.getElementById("lowStockTableBody");
+const selectedQuantityTotal = document.getElementById(
+  "selectedQuantityTotal"
+);
 
-const resultCount =
-  document.getElementById("resultCount");
+const selectedPriceTotal = document.getElementById(
+  "selectedPriceTotal"
+);
 
-const emptyMessage =
-  document.getElementById("emptyMessage");
+const selectAllCheckbox = document.getElementById(
+  "selectAllCheckbox"
+);
 
-const exportExcelButton =
-  document.getElementById("exportExcelButton");
+const saveSelectedListButton = document.getElementById(
+  "saveSelectedListButton"
+);
 
-const exportPdfButton =
-  document.getElementById("exportPdfButton");
+const exportExcelButton = document.getElementById(
+  "exportExcelButton"
+);
 
-const selectAllCheckbox =
-  document.getElementById("selectAllCheckbox");
+const exportPdfButton = document.getElementById(
+  "exportPdfButton"
+);
 
-const lowStockSearch =
-  document.getElementById("lowStockSearch");
+const saveChoiceModal = document.getElementById(
+  "saveChoiceModal"
+);
 
-const selectedQuantityTotal =
-  document.getElementById("selectedQuantityTotal");
+const cancelSaveButton = document.getElementById(
+  "cancelSaveButton"
+);
 
-const selectedPriceTotal =
-  document.getElementById("selectedPriceTotal");
+const saveNewButton = document.getElementById(
+  "saveNewButton"
+);
+
+const overwriteSaveButton = document.getElementById(
+  "overwriteSaveButton"
+);
+
+const sortableHeaders = document.querySelectorAll(
+  "[data-sort-key]"
+);
 
 function escapeHtml(value) {
-  return String(value ?? "-")
+  return String(value ?? "")
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;")
@@ -65,40 +87,52 @@ function escapeHtml(value) {
     .replaceAll("'", "&#039;");
 }
 
-function getLowStockItems() {
-  return products
-    .filter(function (product) {
-      const stock = Number(product.stock || 0);
-
-      const minimumStock =
-        Number(product.minimum_stock || 0);
-
-      return (
-        product.archived !== true &&
-        (
-          stock === 0 ||
-          (stock > 0 && stock < minimumStock)
-        )
-      );
-    })
-    .sort(function (firstProduct, secondProduct) {
-      return String(firstProduct.name || "")
-        .localeCompare(
-          String(secondProduct.name || ""),
-          undefined,
-          { sensitivity: "base" }
-        );
-    });
+function getStock(product) {
+  return Number(product.stock || 0);
 }
 
-function getVisibleLowStockItems() {
-  const keyword = searchTerm.trim().toLowerCase();
+function getMinimumStock(product) {
+  return Number(product.minimum_stock || 0);
+}
 
-  if (!keyword) {
-    return getLowStockItems();
-  }
+function getPrice(product) {
+  return Number(product.price || 0);
+}
 
-  return getLowStockItems().filter(function (product) {
+function getQuantityNeeded(product) {
+  return Math.max(
+    getMinimumStock(product) - getStock(product),
+    0
+  );
+}
+
+function getTotalPrice(product) {
+  return getQuantityNeeded(product) * getPrice(product);
+}
+
+function getTodayListName() {
+  const date = new Date();
+
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day} @ Restock List`;
+}
+
+function getLowStockProducts() {
+  const searchText = lowStockSearch.value
+    .trim()
+    .toLowerCase();
+
+  const filteredProducts = products.filter(function (product) {
+    const stock = getStock(product);
+    const minimumStock = getMinimumStock(product);
+
+    const isLowStock =
+      stock === 0 ||
+      (stock > 0 && stock < minimumStock);
+
     const searchableText = [
       product.barcode,
       product.category,
@@ -107,532 +141,468 @@ function getVisibleLowStockItems() {
       .join(" ")
       .toLowerCase();
 
-    return searchableText.includes(keyword);
+    return isLowStock && searchableText.includes(searchText);
+  });
+
+  if (!sortKey) {
+    return filteredProducts;
+  }
+
+  return filteredProducts.sort(function (firstProduct, secondProduct) {
+    const firstValue = String(
+      firstProduct[sortKey] || ""
+    ).toLowerCase();
+
+    const secondValue = String(
+      secondProduct[sortKey] || ""
+    ).toLowerCase();
+
+    const comparison = firstValue.localeCompare(
+      secondValue,
+      undefined,
+      { sensitivity: "base" }
+    );
+
+    return sortDirection === "asc"
+      ? comparison
+      : -comparison;
   });
 }
 
-function getRestockQuantity(product) {
-  const currentStock = Number(product.stock || 0);
-
-  const minimumStock =
-    Number(product.minimum_stock || 0);
-
-  return Math.max(minimumStock - currentStock, 0);
-}
-
-function getRestockCost(product) {
-  return getRestockQuantity(product) *
-    Number(product.price || 0);
-}
-
-function getSelectedLowStockItems() {
-  return getLowStockItems().filter(function (product) {
+function getSelectedProducts() {
+  return products.filter(function (product) {
     return selectedProductIds.has(String(product.id));
   });
 }
 
-function updateSelectionSummary() {
-  const allLowStockItems = getLowStockItems();
-  const visibleItems = getVisibleLowStockItems();
+function updateSortHeaderLabels() {
+  sortableHeaders.forEach(function (header) {
+    const key = header.dataset.sortKey;
 
-  const selectedItems =
-    getSelectedLowStockItems();
+    if (key === "category") {
+      header.textContent =
+        sortKey === "category"
+          ? `Category ${sortDirection === "asc" ? "↑" : "↓"}`
+          : "Category ↕";
+    }
 
-  const selectedCount = selectedItems.length;
-
-  const selectedVisibleCount =
-    visibleItems.filter(function (product) {
-      return selectedProductIds.has(String(product.id));
-    }).length;
-
-  const totalSelectedPrice =
-    selectedItems.reduce(function (total, product) {
-      return total + getRestockCost(product);
-    }, 0);
-
-  resultCount.textContent =
-    `${allLowStockItems.length} item(s) require restocking · ` +
-    `${selectedCount} selected`;
-
-  selectedQuantityTotal.textContent =
-    selectedCount;
-
-  selectedPriceTotal.textContent =
-    `RM ${totalSelectedPrice.toFixed(2)}`;
-
-  selectAllCheckbox.checked =
-    visibleItems.length > 0 &&
-    selectedVisibleCount === visibleItems.length;
-
-  selectAllCheckbox.indeterminate =
-    selectedVisibleCount > 0 &&
-    selectedVisibleCount < visibleItems.length;
-}
-
-function displayLowStockItems() {
-  const allLowStockItems = getLowStockItems();
-  const visibleItems = getVisibleLowStockItems();
-
-  lowStockTableBody.innerHTML = "";
-
-  const validIds = new Set(
-    allLowStockItems.map(function (product) {
-      return String(product.id);
-    })
-  );
-
-  selectedProductIds.forEach(function (productId) {
-    if (!validIds.has(productId)) {
-      selectedProductIds.delete(productId);
+    if (key === "name") {
+      header.textContent =
+        sortKey === "name"
+          ? `Product ${sortDirection === "asc" ? "↑" : "↓"}`
+          : "Product ↕";
     }
   });
+}
 
-  if (allLowStockItems.length === 0) {
-    selectedProductIds.clear();
+function updateSelectionSummary() {
+  const selectedProducts = getSelectedProducts();
 
-    emptyMessage.textContent =
-      "No low-stock or out-of-stock items found.";
+  const selectedTotal = selectedProducts.reduce(
+    function (total, product) {
+      return total + getTotalPrice(product);
+    },
+    0
+  );
 
+  selectedQuantityTotal.textContent =
+    selectedProducts.length;
+
+  selectedPriceTotal.textContent =
+    `RM ${selectedTotal.toFixed(2)}`;
+
+  const visibleProducts = getLowStockProducts();
+
+  const everyVisibleProductSelected =
+    visibleProducts.length > 0 &&
+    visibleProducts.every(function (product) {
+      return selectedProductIds.has(String(product.id));
+    });
+
+  selectAllCheckbox.checked = everyVisibleProductSelected;
+
+  selectAllCheckbox.indeterminate =
+    !everyVisibleProductSelected &&
+    visibleProducts.some(function (product) {
+      return selectedProductIds.has(String(product.id));
+    });
+
+  resultCount.textContent =
+    `${visibleProducts.length} item(s) require restocking · ` +
+    `${selectedProducts.length} selected`;
+}
+
+function displayProducts() {
+  const lowStockProducts = getLowStockProducts();
+
+  lowStockTableBody.innerHTML = "";
+  updateSortHeaderLabels();
+
+  if (lowStockProducts.length === 0) {
     emptyMessage.style.display = "block";
-
     updateSelectionSummary();
-
-    return;
-  }
-
-  if (visibleItems.length === 0) {
-    emptyMessage.textContent =
-      "No matching low-stock products found.";
-
-    emptyMessage.style.display = "block";
-
-    updateSelectionSummary();
-
     return;
   }
 
   emptyMessage.style.display = "none";
 
-  visibleItems.forEach(function (product) {
+  lowStockProducts.forEach(function (product) {
     const productId = String(product.id);
-
-    const isSelected =
-      selectedProductIds.has(productId);
+    const quantityNeeded = getQuantityNeeded(product);
+    const totalPrice = getTotalPrice(product);
 
     lowStockTableBody.innerHTML += `
       <tr>
-        <td>${escapeHtml(product.barcode)}</td>
-        <td>${escapeHtml(product.category)}</td>
-        <td>${escapeHtml(product.name)}</td>
-        <td>${escapeHtml(product.unit)}</td>
-        <td>${Number(product.minimum_stock || 0)}</td>
-        <td>${Number(product.stock || 0)}</td>
-        <td>${getRestockQuantity(product)}</td>
-        <td>${Number(product.price || 0).toFixed(2)}</td>
-        <td>${getRestockCost(product).toFixed(2)}</td>
-
+        <td>${escapeHtml(product.barcode || "-")}</td>
+        <td>${escapeHtml(product.category || "-")}</td>
+        <td>${escapeHtml(product.name || "-")}</td>
+        <td>${escapeHtml(product.unit || "-")}</td>
+        <td>${getMinimumStock(product)}</td>
+        <td>${getStock(product)}</td>
+        <td>${quantityNeeded}</td>
+        <td>${getPrice(product).toFixed(2)}</td>
+        <td>${totalPrice.toFixed(2)}</td>
         <td class="select-column">
           <input
-            class="product-select-checkbox"
+            class="product-checkbox"
             data-product-id="${escapeHtml(productId)}"
             type="checkbox"
             aria-label="Select ${escapeHtml(product.name)}"
-            ${isSelected ? "checked" : ""}
+            ${selectedProductIds.has(productId) ? "checked" : ""}
           >
         </td>
       </tr>
     `;
   });
 
+  document
+    .querySelectorAll(".product-checkbox")
+    .forEach(function (checkbox) {
+      checkbox.addEventListener("change", function () {
+        const productId = checkbox.dataset.productId;
+
+        if (checkbox.checked) {
+          selectedProductIds.add(productId);
+        } else {
+          selectedProductIds.delete(productId);
+        }
+
+        updateSelectionSummary();
+      });
+    });
+
   updateSelectionSummary();
 }
 
-function getProductsToExport() {
-  const selectedItems = getSelectedLowStockItems();
+function chooseSaveAction() {
+  return new Promise(function (resolve) {
+    saveChoiceModal.hidden = false;
 
-  if (selectedItems.length === 0) {
-    alert(
-      "Please select at least one product before exporting the report."
+    function closeModal(choice) {
+      saveChoiceModal.hidden = true;
+
+      cancelSaveButton.removeEventListener(
+        "click",
+        cancelHandler
+      );
+
+      saveNewButton.removeEventListener(
+        "click",
+        saveNewHandler
+      );
+
+      overwriteSaveButton.removeEventListener(
+        "click",
+        overwriteHandler
+      );
+
+      resolve(choice);
+    }
+
+    function cancelHandler() {
+      closeModal("cancel");
+    }
+
+    function saveNewHandler() {
+      closeModal("new");
+    }
+
+    function overwriteHandler() {
+      closeModal("overwrite");
+    }
+
+    cancelSaveButton.addEventListener(
+      "click",
+      cancelHandler
     );
 
-    return null;
-  }
+    saveNewButton.addEventListener(
+      "click",
+      saveNewHandler
+    );
 
-  return selectedItems;
+    overwriteSaveButton.addEventListener(
+      "click",
+      overwriteHandler
+    );
+  });
 }
 
-function downloadCsvReport(selectedItems) {
-  let csvContent =
-    "\uFEFFSIMS Selected Restock Report\n";
+function setSaveButtonState(isSaving) {
+  saveSelectedListButton.disabled = isSaving;
 
-  csvContent +=
-    `Generated,${new Date().toLocaleString()}\n`;
+  saveSelectedListButton.textContent = isSaving
+    ? "Saving..."
+    : "Save Selected List";
+}
 
-  csvContent +=
-    `Prepared By,${currentUser.name}\n\n`;
-
-  csvContent +=
-    "Barcode,Category,Product,Unit,Minimum Quantity,Current Quantity,Quantity Needed,Unit Price (RM),Total (RM)\n";
-
-  selectedItems.forEach(function (product) {
-    csvContent +=
-      `"${product.barcode || "-"}",` +
-      `"${product.category || "-"}",` +
-      `"${product.name || "-"}",` +
-      `"${product.unit || "-"}",` +
-      `"${Number(product.minimum_stock || 0)}",` +
-      `"${Number(product.stock || 0)}",` +
-      `"${getRestockQuantity(product)}",` +
-      `"${Number(product.price || 0).toFixed(2)}",` +
-      `"${getRestockCost(product).toFixed(2)}"\n`;
-  });
-
-  const totalRestockCost = selectedItems.reduce(
+function getSelectedListTotals(selectedProducts) {
+  const estimatedTotal = selectedProducts.reduce(
     function (total, product) {
-      return total + getRestockCost(product);
+      return total + getTotalPrice(product);
     },
     0
   );
 
-  csvContent += "\n";
-
-  csvContent +=
-    `Total Selected Products,${selectedItems.length}\n`;
-
-  csvContent +=
-    `Total Restock Amount (RM),${totalRestockCost.toFixed(2)}\n`;
-
-  const file = new Blob(
-    [csvContent],
-    { type: "text/csv;charset=utf-8;" }
-  );
-
-  const link = document.createElement("a");
-
-  link.href = URL.createObjectURL(file);
-
-  link.download =
-    `SIMS_Selected_Restock_Report_${
-      new Date().toISOString().slice(0, 10)
-    }.csv`;
-
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
-
-  setTimeout(function () {
-    URL.revokeObjectURL(link.href);
-  }, 1000);
+  return {
+    totalItems: selectedProducts.length,
+    estimatedTotal: estimatedTotal
+  };
 }
 
-function exportExcel() {
-  const selectedItems = getProductsToExport();
+async function saveSelectedList() {
+  const selectedProducts = getSelectedProducts();
 
-  if (!selectedItems) {
+  if (selectedProducts.length === 0) {
+    alert("Please select at least one low-stock product first.");
+    return;
+  }
+
+  const listName = getTodayListName();
+
+  setSaveButtonState(true);
+
+  const { data: existingLists, error: existingError } =
+    await supabaseClient
+      .from("restock_lists")
+      .select("id, list_name, saved_by")
+      .eq("list_name", listName)
+      .eq("saved_by", currentUser.id)
+      .order("saved_at", { ascending: false });
+
+  if (existingError) {
+    setSaveButtonState(false);
+
+    alert(
+      `Unable to check existing saved lists: ${existingError.message}`
+    );
+
+    return;
+  }
+
+  let saveAction = "new";
+  let existingList = null;
+
+  if (existingLists && existingLists.length > 0) {
+    existingList = existingLists[0];
+    saveAction = await chooseSaveAction();
+
+    if (saveAction === "cancel") {
+      setSaveButtonState(false);
+      return;
+    }
+  }
+
+  const totals = getSelectedListTotals(selectedProducts);
+
+  let restockListId = null;
+
+  if (saveAction === "overwrite" && existingList) {
+    const { error: updateError } = await supabaseClient
+      .from("restock_lists")
+      .update({
+        saved_by_name: currentUser.name,
+        saved_at: new Date().toISOString(),
+        total_items: totals.totalItems,
+        estimated_total: totals.estimatedTotal
+      })
+      .eq("id", existingList.id)
+      .eq("saved_by", currentUser.id);
+
+    if (updateError) {
+      setSaveButtonState(false);
+
+      alert(
+        `Unable to update the previous list: ${updateError.message}`
+      );
+
+      return;
+    }
+
+    const { error: deleteItemsError } = await supabaseClient
+      .from("restock_list_items")
+      .delete()
+      .eq("restock_list_id", existingList.id);
+
+    if (deleteItemsError) {
+      setSaveButtonState(false);
+
+      alert(
+        `The list was updated, but old products could not be replaced: ${deleteItemsError.message}`
+      );
+
+      return;
+    }
+
+    restockListId = existingList.id;
+  } else {
+    const { data: newList, error: insertListError } =
+      await supabaseClient
+        .from("restock_lists")
+        .insert({
+          list_name: listName,
+          saved_by: currentUser.id,
+          saved_by_name: currentUser.name,
+          total_items: totals.totalItems,
+          estimated_total: totals.estimatedTotal
+        })
+        .select("id")
+        .single();
+
+    if (insertListError) {
+      setSaveButtonState(false);
+
+      alert(
+        `Unable to save the restock list: ${insertListError.message}`
+      );
+
+      return;
+    }
+
+    restockListId = newList.id;
+  }
+
+  const itemsToSave = selectedProducts.map(function (product) {
+    return {
+      restock_list_id: restockListId,
+      product_id: product.id,
+      barcode: product.barcode || "",
+      category: product.category || "",
+      product_name: product.name || "",
+      unit: product.unit || "",
+      minimum_quantity: getMinimumStock(product),
+      current_quantity: getStock(product),
+      quantity_needed: getQuantityNeeded(product),
+      unit_price: getPrice(product),
+      total_price: getTotalPrice(product)
+    };
+  });
+
+  const { error: insertItemsError } = await supabaseClient
+    .from("restock_list_items")
+    .insert(itemsToSave);
+
+  setSaveButtonState(false);
+
+  if (insertItemsError) {
+    alert(
+      `The list was created, but products could not be saved: ${insertItemsError.message}`
+    );
+
+    return;
+  }
+
+  alert(
+    saveAction === "overwrite"
+      ? "Your restock list has been overwritten successfully."
+      : "Your restock list has been saved successfully."
+  );
+}
+
+function exportSelectedToExcel() {
+  const selectedProducts = getSelectedProducts();
+
+  if (selectedProducts.length === 0) {
+    alert("Please select at least one low-stock product first.");
     return;
   }
 
   if (typeof XLSX === "undefined") {
-    downloadCsvReport(selectedItems);
-
-    alert(
-      "A CSV report was downloaded because the Excel design library could not load."
-    );
-
+    alert("Excel export is unavailable. Please check your internet connection.");
     return;
   }
 
-  try {
-    const totalRestockCost = selectedItems.reduce(
-      function (total, product) {
-        return total + getRestockCost(product);
-      },
-      0
-    );
+  const workbook = XLSX.utils.book_new();
 
-    const worksheetData = [
-      ["SIMS SELECTED RESTOCK REPORT"],
-      ["Selected Low Stock Items"],
-      ["Generated:", new Date().toLocaleString()],
-      ["Prepared by:", currentUser.name],
-      [],
-      [
-        "Barcode",
-        "Category",
-        "Product",
-        "Unit",
-        "Minimum Quantity",
-        "Current Quantity",
-        "Quantity Needed",
-        "Unit Price (RM)",
-        "Total (RM)"
-      ]
-    ];
-
-    selectedItems.forEach(function (product) {
-      worksheetData.push([
-        product.barcode || "-",
-        product.category || "-",
-        product.name || "-",
-        product.unit || "-",
-        Number(product.minimum_stock || 0),
-        Number(product.stock || 0),
-        getRestockQuantity(product),
-        Number(product.price || 0),
-        getRestockCost(product)
-      ]);
-    });
-
-    worksheetData.push([]);
-
-    worksheetData.push([
-      "TOTAL SELECTED PRODUCTS",
-      selectedItems.length
-    ]);
-
-    worksheetData.push([
-      "TOTAL RESTOCK AMOUNT (RM)",
-      totalRestockCost
-    ]);
-
-    const worksheet =
-      XLSX.utils.aoa_to_sheet(worksheetData);
-
-    worksheet["!merges"] = [
-      {
-        s: { r: 0, c: 0 },
-        e: { r: 0, c: 8 }
-      },
-      {
-        s: { r: 1, c: 0 },
-        e: { r: 1, c: 8 }
-      }
-    ];
-
-    worksheet["!cols"] = [
-      { wch: 18 },
-      { wch: 18 },
-      { wch: 28 },
-      { wch: 12 },
-      { wch: 18 },
-      { wch: 18 },
-      { wch: 17 },
-      { wch: 17 },
-      { wch: 16 }
-    ];
-
-    worksheet["!autofilter"] = {
-      ref: `A6:I${6 + selectedItems.length}`
+  const data = selectedProducts.map(function (product) {
+    return {
+      Barcode: product.barcode || "",
+      Category: product.category || "",
+      Product: product.name || "",
+      Unit: product.unit || "",
+      "Minimum Quantity": getMinimumStock(product),
+      "Current Quantity": getStock(product),
+      "Quantity Needed": getQuantityNeeded(product),
+      "Unit Price (RM)": getPrice(product),
+      "Total (RM)": getTotalPrice(product)
     };
-
-    const thinBorder = {
-      top: { style: "thin", color: { rgb: "E5E7EB" } },
-      bottom: { style: "thin", color: { rgb: "E5E7EB" } },
-      left: { style: "thin", color: { rgb: "E5E7EB" } },
-      right: { style: "thin", color: { rgb: "E5E7EB" } }
-    };
-
-    const titleStyle = {
-      font: {
-        bold: true,
-        color: { rgb: "FFFFFF" },
-        sz: 16
-      },
-      fill: {
-        fgColor: { rgb: "991B1B" }
-      },
-      alignment: {
-        horizontal: "center",
-        vertical: "center"
-      }
-    };
-
-    const subtitleStyle = {
-      font: {
-        italic: true,
-        color: { rgb: "7F1D1D" },
-        sz: 11
-      },
-      fill: {
-        fgColor: { rgb: "FEE2E2" }
-      },
-      alignment: {
-        horizontal: "center",
-        vertical: "center"
-      }
-    };
-
-    const headerStyle = {
-      font: {
-        bold: true,
-        color: { rgb: "FFFFFF" }
-      },
-      fill: {
-        fgColor: { rgb: "DC2626" }
-      },
-      alignment: {
-        horizontal: "center",
-        vertical: "center",
-        wrapText: true
-      },
-      border: thinBorder
-    };
-
-    const normalRowStyle = {
-      alignment: {
-        vertical: "center"
-      },
-      border: thinBorder
-    };
-
-    const alternateRowStyle = {
-      fill: {
-        fgColor: { rgb: "FFF7F7" }
-      },
-      alignment: {
-        vertical: "center"
-      },
-      border: thinBorder
-    };
-
-    const summaryLabelStyle = {
-      font: {
-        bold: true,
-        color: { rgb: "7F1D1D" }
-      },
-      fill: {
-        fgColor: { rgb: "FEE2E2" }
-      },
-      border: thinBorder
-    };
-
-    const summaryValueStyle = {
-      font: {
-        bold: true,
-        color: { rgb: "991B1B" }
-      },
-      fill: {
-        fgColor: { rgb: "FFF1F2" }
-      },
-      alignment: {
-        horizontal: "right"
-      },
-      border: thinBorder
-    };
-
-    worksheet["A1"].s = titleStyle;
-    worksheet["A2"].s = subtitleStyle;
-
-    for (let column = 0; column <= 8; column++) {
-      const cell = XLSX.utils.encode_cell({
-        r: 5,
-        c: column
-      });
-
-      worksheet[cell].s = headerStyle;
-    }
-
-    selectedItems.forEach(function (product, index) {
-      const row = 6 + index;
-
-      const rowStyle = index % 2 === 0
-        ? normalRowStyle
-        : alternateRowStyle;
-
-      for (let column = 0; column <= 8; column++) {
-        const cell = XLSX.utils.encode_cell({
-          r: row,
-          c: column
-        });
-
-        worksheet[cell].s = rowStyle;
-      }
-
-      const unitPriceCell =
-        XLSX.utils.encode_cell({ r: row, c: 7 });
-
-      const totalCell =
-        XLSX.utils.encode_cell({ r: row, c: 8 });
-
-      worksheet[unitPriceCell].z = "#,##0.00";
-      worksheet[totalCell].z = "#,##0.00";
-    });
-
-    const totalProductsRow =
-      8 + selectedItems.length;
-
-    const totalCostRow =
-      9 + selectedItems.length;
-
-    worksheet[`A${totalProductsRow}`].s =
-      summaryLabelStyle;
-
-    worksheet[`B${totalProductsRow}`].s =
-      summaryValueStyle;
-
-    worksheet[`A${totalCostRow}`].s =
-      summaryLabelStyle;
-
-    worksheet[`B${totalCostRow}`].s =
-      summaryValueStyle;
-
-    worksheet[`B${totalCostRow}`].z = "#,##0.00";
-
-    const workbook = XLSX.utils.book_new();
-
-    XLSX.utils.book_append_sheet(
-      workbook,
-      worksheet,
-      "Selected Restock Report"
-    );
-
-    XLSX.writeFile(
-      workbook,
-      `SIMS_Selected_Restock_Report_${
-        new Date().toISOString().slice(0, 10)
-      }.xlsx`
-    );
-  } catch (error) {
-    downloadCsvReport(selectedItems);
-
-    alert(
-      "The styled Excel report could not be created, so SIMS downloaded a CSV report instead."
-    );
-  }
-}
-
-function exportPdf() {
-  const selectedItems = getProductsToExport();
-
-  if (!selectedItems) {
-    return;
-  }
-
-  const totalRestockCost = selectedItems.reduce(
-    function (total, product) {
-      return total + getRestockCost(product);
-    },
-    0
-  );
-
-  let tableRows = "";
-
-  selectedItems.forEach(function (product) {
-    tableRows += `
-      <tr>
-        <td>${escapeHtml(product.barcode)}</td>
-        <td>${escapeHtml(product.category)}</td>
-        <td>${escapeHtml(product.name)}</td>
-        <td>${escapeHtml(product.unit)}</td>
-        <td>${Number(product.minimum_stock || 0)}</td>
-        <td>${Number(product.stock || 0)}</td>
-        <td>${getRestockQuantity(product)}</td>
-        <td>${Number(product.price || 0).toFixed(2)}</td>
-        <td>${getRestockCost(product).toFixed(2)}</td>
-      </tr>
-    `;
   });
 
+  const worksheet = XLSX.utils.json_to_sheet(data);
+
+  worksheet["!cols"] = [
+    { wch: 18 },
+    { wch: 18 },
+    { wch: 28 },
+    { wch: 12 },
+    { wch: 18 },
+    { wch: 18 },
+    { wch: 18 },
+    { wch: 18 },
+    { wch: 16 }
+  ];
+
+  XLSX.utils.book_append_sheet(
+    workbook,
+    worksheet,
+    "Restock List"
+  );
+
+  XLSX.writeFile(
+    workbook,
+    `${getTodayListName()}.xlsx`
+  );
+}
+
+function createPrintRows(selectedProducts) {
+  return selectedProducts
+    .map(function (product) {
+      return `
+        <tr>
+          <td>${escapeHtml(product.barcode || "-")}</td>
+          <td>${escapeHtml(product.category || "-")}</td>
+          <td>${escapeHtml(product.name || "-")}</td>
+          <td>${escapeHtml(product.unit || "-")}</td>
+          <td>${getMinimumStock(product)}</td>
+          <td>${getStock(product)}</td>
+          <td>${getQuantityNeeded(product)}</td>
+          <td>${getPrice(product).toFixed(2)}</td>
+          <td>${getTotalPrice(product).toFixed(2)}</td>
+        </tr>
+      `;
+    })
+    .join("");
+}
+
+function printSelectedPdf() {
+  const selectedProducts = getSelectedProducts();
+
+  if (selectedProducts.length === 0) {
+    alert("Please select at least one low-stock product first.");
+    return;
+  }
+
+  const totals = getSelectedListTotals(selectedProducts);
   const printWindow = window.open("", "_blank");
 
   if (!printWindow) {
@@ -643,78 +613,142 @@ function exportPdf() {
     return;
   }
 
+  const reportDate = new Date().toLocaleString();
+
   printWindow.document.write(`
     <!doctype html>
     <html lang="en">
     <head>
       <meta charset="UTF-8">
-      <title>SIMS Selected Restock Report</title>
+      <title>${escapeHtml(getTodayListName())}</title>
 
       <style>
         @page {
-          size: A4 landscape;
+          size: A4 portrait;
           margin: 12mm;
+        }
+
+        * {
+          box-sizing: border-box;
         }
 
         body {
           margin: 0;
           color: #1f2937;
           font-family: Arial, sans-serif;
+          font-size: 10px;
+        }
+
+        .report-header {
+          margin-bottom: 14px;
         }
 
         h1 {
-          margin: 0 0 6px;
+          margin: 0 0 8px;
           color: #b91c1c;
-          font-size: 24px;
+          font-size: 23px;
         }
 
-        p {
+        .report-header p {
           margin: 4px 0;
-          color: #4b5563;
-          font-size: 13px;
-        }
-
-        .summary {
-          padding: 12px;
-          margin: 20px 0;
-          background: #fef2f2;
-          border-left: 4px solid #dc2626;
+          color: #475569;
+          font-size: 11px;
         }
 
         table {
           width: 100%;
           border-collapse: collapse;
+          table-layout: fixed;
+          font-size: 8px;
+        }
+
+        thead {
+          display: table-header-group;
+        }
+
+        tr {
+          break-inside: avoid;
+          page-break-inside: avoid;
         }
 
         th,
         td {
-          padding: 7px;
-          font-size: 9px;
+          padding: 6px 4px;
+          overflow-wrap: anywhere;
           text-align: left;
-          border: 1px solid #d1d5db;
+          vertical-align: top;
+          border: 1px solid #64748b;
         }
 
         th {
           color: white;
+          font-weight: bold;
           background: #b91c1c;
+        }
+
+        tbody tr:nth-child(even) {
+          background: #fff1f2;
+        }
+
+        th:nth-child(1),
+        td:nth-child(1) {
+          width: 12%;
+        }
+
+        th:nth-child(2),
+        td:nth-child(2) {
+          width: 11%;
+        }
+
+        th:nth-child(3),
+        td:nth-child(3) {
+          width: 16%;
+        }
+
+        th:nth-child(4),
+        td:nth-child(4) {
+          width: 8%;
+        }
+
+        th:nth-child(5),
+        td:nth-child(5),
+        th:nth-child(6),
+        td:nth-child(6),
+        th:nth-child(7),
+        td:nth-child(7) {
+          width: 11%;
+        }
+
+        th:nth-child(8),
+        td:nth-child(8),
+        th:nth-child(9),
+        td:nth-child(9) {
+          width: 10%;
+        }
+
+        .summary {
+          margin-top: 16px;
+          padding: 13px 16px;
+          color: #7f1d1d;
+          background: #fff1f2;
+          border: 1px solid #fecaca;
+          border-left: 6px solid #dc2626;
+        }
+
+        .summary p {
+          margin: 5px 0;
+          font-size: 13px;
+          font-weight: bold;
         }
       </style>
     </head>
 
     <body>
-      <h1>SIMS Selected Restock Report</h1>
-
-      <p>Generated: ${new Date().toLocaleString()}</p>
-      <p>Prepared by: ${escapeHtml(currentUser.name)}</p>
-
-      <div class="summary">
-        <strong>Total selected products:</strong>
-        ${selectedItems.length}
-        <br>
-
-        <strong>Total restock amount:</strong>
-        RM ${totalRestockCost.toFixed(2)}
-      </div>
+      <header class="report-header">
+        <h1>${escapeHtml(getTodayListName())}</h1>
+        <p>Generated: ${escapeHtml(reportDate)}</p>
+        <p>Prepared by: ${escapeHtml(currentUser.name)}</p>
+      </header>
 
       <table>
         <thead>
@@ -732,9 +766,14 @@ function exportPdf() {
         </thead>
 
         <tbody>
-          ${tableRows}
+          ${createPrintRows(selectedProducts)}
         </tbody>
       </table>
+
+      <section class="summary">
+        <p>Total Items Selected: ${totals.totalItems}</p>
+        <p>Estimated Total: RM ${totals.estimatedTotal.toFixed(2)}</p>
+      </section>
     </body>
     </html>
   `);
@@ -742,6 +781,7 @@ function exportPdf() {
   printWindow.document.close();
 
   printWindow.onload = function () {
+    printWindow.focus();
     printWindow.print();
   };
 }
@@ -749,34 +789,22 @@ function exportPdf() {
 async function loadProducts() {
   const { data, error } = await supabaseClient
     .from("products")
-    .select(`
-      id,
-      barcode,
-      name,
-      category,
-      unit,
-      stock,
-      minimum_stock,
-      price,
-      archived
-    `)
+    .select(
+      "id, barcode, name, category, unit, stock, minimum_stock, price, archived"
+    )
+    .eq("archived", false)
     .order("name", { ascending: true });
 
   if (error) {
-    lowStockTableBody.innerHTML = "";
-    resultCount.textContent = "";
-
     emptyMessage.textContent =
-      `Unable to load products: ${error.message}`;
+      `Unable to load low-stock items: ${error.message}`;
 
     emptyMessage.style.display = "block";
-
     return;
   }
 
   products = data || [];
-
-  displayLowStockItems();
+  displayProducts();
 }
 
 async function logout() {
@@ -824,7 +852,7 @@ async function initialisePage() {
   currentUser = {
     id: profile.id,
     username: profile.username,
-    name: profile.full_name || profile.username,
+    name: profile.full_name || profile.username || "Supervisor User",
     role: profile.role
   };
 
@@ -833,63 +861,75 @@ async function initialisePage() {
     JSON.stringify(currentUser)
   );
 
-  const displayName = currentUser.name;
+  const initial =
+    currentUser.name.charAt(0).toUpperCase() || "S";
 
-  const firstLetter =
-    displayName.charAt(0).toUpperCase();
+  supervisorName.textContent = currentUser.name;
+  sidebarSupervisorName.textContent = currentUser.name;
+  supervisorAvatar.textContent = initial;
+  sidebarSupervisorAvatar.textContent = initial;
 
-  supervisorName.textContent = displayName;
-  sidebarSupervisorName.textContent = displayName;
-
-  supervisorAvatar.textContent = firstLetter;
-  sidebarSupervisorAvatar.textContent = firstLetter;
-
-  loadProducts();
+  await loadProducts();
 }
 
+lowStockSearch.addEventListener("input", displayProducts);
+
 selectAllCheckbox.addEventListener("change", function () {
-  const visibleItems = getVisibleLowStockItems();
+  const visibleProducts = getLowStockProducts();
 
-  if (selectAllCheckbox.checked) {
-    visibleItems.forEach(function (product) {
-      selectedProductIds.add(String(product.id));
-    });
-  } else {
-    visibleItems.forEach(function (product) {
-      selectedProductIds.delete(String(product.id));
-    });
-  }
+  visibleProducts.forEach(function (product) {
+    const productId = String(product.id);
 
-  displayLowStockItems();
+    if (selectAllCheckbox.checked) {
+      selectedProductIds.add(productId);
+    } else {
+      selectedProductIds.delete(productId);
+    }
+  });
+
+  displayProducts();
 });
 
-lowStockTableBody.addEventListener("change", function (event) {
-  const checkbox = event.target.closest(
-    ".product-select-checkbox"
-  );
+sortableHeaders.forEach(function (header) {
+  function sortProducts() {
+    const clickedKey = header.dataset.sortKey;
 
-  if (!checkbox) {
-    return;
+    if (sortKey === clickedKey) {
+      sortDirection =
+        sortDirection === "asc" ? "desc" : "asc";
+    } else {
+      sortKey = clickedKey;
+      sortDirection = "asc";
+    }
+
+    displayProducts();
   }
 
-  const productId = checkbox.dataset.productId;
+  header.addEventListener("click", sortProducts);
 
-  if (checkbox.checked) {
-    selectedProductIds.add(productId);
-  } else {
-    selectedProductIds.delete(productId);
-  }
-
-  updateSelectionSummary();
+  header.addEventListener("keydown", function (event) {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      sortProducts();
+    }
+  });
 });
 
-lowStockSearch.addEventListener("input", function () {
-  searchTerm = lowStockSearch.value;
-  displayLowStockItems();
-});
+saveSelectedListButton.addEventListener(
+  "click",
+  saveSelectedList
+);
 
-exportExcelButton.addEventListener("click", exportExcel);
-exportPdfButton.addEventListener("click", exportPdf);
+exportExcelButton.addEventListener(
+  "click",
+  exportSelectedToExcel
+);
+
+exportPdfButton.addEventListener(
+  "click",
+  printSelectedPdf
+);
+
 logoutButton.addEventListener("click", logout);
 
 initialisePage();
