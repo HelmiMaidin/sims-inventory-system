@@ -13,8 +13,11 @@ let products = [];
 let stockHistory = [];
 
 const totalProducts = document.getElementById("totalProducts");
+
 const totalStock = document.getElementById("totalStock");
+
 const lowStockCount = document.getElementById("lowStockCount");
+
 const todayTransactions =
   document.getElementById("todayTransactions");
 
@@ -36,8 +39,28 @@ function escapeHtml(value) {
     .replaceAll("'", "&#039;");
 }
 
+function getStock(product) {
+  return Number(product.stock || 0);
+}
+
+function getMinimumStock(product) {
+  return Number(product.minimum_stock || 0);
+}
+
+function isLowStock(product) {
+  const stock = getStock(product);
+  const minimumStock = getMinimumStock(product);
+
+  return stock === 0 || (stock > 0 && stock < minimumStock);
+}
+
 function isToday(dateValue) {
   const date = new Date(dateValue);
+
+  if (Number.isNaN(date.getTime())) {
+    return false;
+  }
+
   const today = new Date();
 
   return (
@@ -70,30 +93,40 @@ function displayLowStockItems(lowStockItems) {
         All products have sufficient stock.
       </p>
     `;
+
     return;
   }
 
-  lowStockItems.slice(0, 5).forEach(function (product) {
-    lowStockList.innerHTML += `
-      <div class="list-item">
-        <div>
-          <div class="item-name">
-            ${escapeHtml(product.name)}
+  lowStockItems
+    .sort(function (firstProduct, secondProduct) {
+      return String(firstProduct.name || "").localeCompare(
+        String(secondProduct.name || ""),
+        undefined,
+        { sensitivity: "base" }
+      );
+    })
+    .slice(0, 5)
+    .forEach(function (product) {
+      lowStockList.innerHTML += `
+        <div class="list-item">
+          <div>
+            <div class="item-name">
+              ${escapeHtml(product.name)}
+            </div>
+
+            <div class="item-details">
+              Barcode: ${escapeHtml(product.barcode)} ·
+              Minimum: ${getMinimumStock(product)}
+            </div>
           </div>
 
-          <div class="item-details">
-            Barcode: ${escapeHtml(product.barcode)} ·
-            Minimum: ${Number(product.minimum_stock || 0)}
+          <div class="stock-number low-stock">
+            ${getStock(product)}
+            ${escapeHtml(product.unit || "Unit")}(s)
           </div>
         </div>
-
-        <div class="stock-number low-stock">
-          ${Number(product.stock || 0)}
-          ${escapeHtml(product.unit || "Unit")}(s)
-        </div>
-      </div>
-    `;
-  });
+      `;
+    });
 }
 
 function displayRecentActivity() {
@@ -107,6 +140,7 @@ function displayRecentActivity() {
         No stock transactions yet.
       </p>
     `;
+
     return;
   }
 
@@ -117,6 +151,10 @@ function displayRecentActivity() {
     const transactionDate =
       new Date(transaction.created_at);
 
+    const displayedDate = Number.isNaN(transactionDate.getTime())
+      ? "-"
+      : transactionDate.toLocaleString();
+
     recentActivityList.innerHTML += `
       <div class="list-item">
         <div>
@@ -125,7 +163,7 @@ function displayRecentActivity() {
           </div>
 
           <div class="item-details">
-            ${transactionDate.toLocaleString()} ·
+            ${escapeHtml(displayedDate)} ·
             ${escapeHtml(transaction.transaction_type)}
           </div>
         </div>
@@ -139,16 +177,20 @@ function displayRecentActivity() {
 }
 
 function displayDashboard() {
-  const lowStockItems = products.filter(function (product) {
-    return (
-      Number(product.stock || 0) <=
-      Number(product.minimum_stock || 0)
-    );
+  const activeProducts = products.filter(function (product) {
+    return product.archived !== true;
   });
 
-  const stockQuantity = products.reduce(function (total, product) {
-    return total + Number(product.stock || 0);
-  }, 0);
+  const lowStockItems = activeProducts.filter(function (product) {
+    return isLowStock(product);
+  });
+
+  const stockQuantity = activeProducts.reduce(
+    function (total, product) {
+      return total + getStock(product);
+    },
+    0
+  );
 
   const movementToday = stockHistory.filter(function (transaction) {
     return (
@@ -160,7 +202,7 @@ function displayDashboard() {
     );
   });
 
-  totalProducts.textContent = products.length;
+  totalProducts.textContent = activeProducts.length;
   totalStock.textContent = stockQuantity;
   lowStockCount.textContent = lowStockItems.length;
   todayTransactions.textContent = movementToday.length;
@@ -196,18 +238,22 @@ async function loadDashboardData() {
   if (productsResponse.error) {
     lowStockList.innerHTML = `
       <p class="empty">
-        Unable to load products: ${escapeHtml(productsResponse.error.message)}
+        Unable to load products:
+        ${escapeHtml(productsResponse.error.message)}
       </p>
     `;
+
     return;
   }
 
   if (historyResponse.error) {
     recentActivityList.innerHTML = `
       <p class="empty">
-        Unable to load stock history: ${escapeHtml(historyResponse.error.message)}
+        Unable to load stock history:
+        ${escapeHtml(historyResponse.error.message)}
       </p>
     `;
+
     return;
   }
 
@@ -254,7 +300,9 @@ async function initialisePage() {
     profile.role !== "Staff"
   ) {
     await supabaseClient.auth.signOut();
+
     localStorage.removeItem("currentUser");
+
     window.location.href = "login.html";
     return;
   }
@@ -262,7 +310,7 @@ async function initialisePage() {
   currentUser = {
     id: profile.id,
     username: profile.username,
-    name: profile.full_name,
+    name: profile.full_name || profile.username,
     role: profile.role
   };
 
@@ -271,8 +319,7 @@ async function initialisePage() {
     JSON.stringify(currentUser)
   );
 
-  staffName.textContent =
-    currentUser.name || "Staff User";
+  staffName.textContent = currentUser.name || "Staff User";
 
   loadDashboardData();
 }
