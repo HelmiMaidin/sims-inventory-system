@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIMS | Supervisor Item Availability</title>
+
+  <link rel="stylesheet" href="../CSS/supervisor-item-availability.css">
+</head>
+
+<body>
+  <div class="layout">
+    <aside>
+      <div class="brand">
+        <span class="brand-mark">▦</span>
+
+        <div>
+          <strong>SIMS</strong>
+          <small>Inventory System</small>
+        </div>
+      </div>
+
+      <div class="supervisor-mini-profile">
+        <span id="sidebarSupervisorAvatar" class="profile-avatar">S</span>
+
+        <div>
+          <strong id="sidebarSupervisorName">Supervisor User</strong>
+          <small>Inventory Supervisor</small>
+        </div>
+      </div>
+
+      <p class="label">SUPERVISOR MENU</p>
+
+      <nav>
+        <a href="supervisor-dashboard.html">
+          <span>▦</span> Dashboard
+        </a>
+
+        <a href="supervisor-low-stock.html">
+          <span>!</span> Low Stock Items
+        </a>
+
+        <a class="active" href="supervisor-item-availability.html">
+          <span>▣</span> Item Availability
+        </a>
+
+        <a href="supervisor-edit-item.html">
+          <span>✎</span> Edit Item
+        </a>
+
+        <a href="supervisor-stock-history.html">
+          <span>◷</span> Stock History
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <span class="online-dot"></span>
+        System Online
+      </div>
+    </aside>
+
+    <main>
+      <div class="top">
+        <div>
+          <p class="page-kicker">PRODUCT LOOKUP</p>
+          <h1>Item Availability</h1>
+          <p>Search and check the current details of every active item.</p>
+        </div>
+
+        <div class="user-section">
+          <span
+            id="supervisorAvatar"
+            class="profile-avatar small-avatar"
+          >
+            S
+          </span>
+
+          <span id="supervisorName">Supervisor User</span>
+
+          <button id="logoutButton" type="button">
+            Logout
+          </button>
+        </div>
+      </div>
+
+      <section class="card">
+        <div class="card-head">
+          <div>
+            <p class="card-kicker">INVENTORY CATALOGUE</p>
+            <h2>Available Product Records</h2>
+            <p>
+              Search by barcode number or product name to check stock
+              availability.
+            </p>
+          </div>
+        </div>
+
+        <div class="search-area">
+          <input
+            id="searchInput"
+            type="text"
+            placeholder="Search barcode or product name..."
+            autocomplete="off"
+          >
+
+          <button id="searchButton" type="button">
+            Search
+          </button>
+        </div>
+
+        <p id="resultCount" class="result-count"></p>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Barcode</th>
+                <th>Product Name</th>
+                <th>Category</th>
+                <th>Current Quantity</th>
+                <th>Minimum Quantity</th>
+                <th>Unit</th>
+                <th>Price</th>
+                <th>Availability</th>
+              </tr>
+            </thead>
+
+            <tbody id="productTableBody"></tbody>
+          </table>
+        </div>
+
+        <p id="emptyMessage" class="empty-message">
+          No matching item was found.
+        </p>
+      </section>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../JAVASCRIPT/supervisor-item-availability.js"></script>
+</body>
+</html>
