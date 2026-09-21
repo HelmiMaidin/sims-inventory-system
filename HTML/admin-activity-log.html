@@ -1,1 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIMS | System Activity Log</title>
 
+  <link rel="stylesheet" href="../CSS/admin-activity-log.css">
+</head>
+
+<body>
+  <div class="layout">
+    <aside>
+      <div class="brand">
+        <span class="brand-mark">▦</span>
+
+        <div>
+          <strong>SIMS</strong>
+          <small>Inventory System</small>
+        </div>
+      </div>
+
+      <div class="admin-mini-profile">
+        <span id="sidebarAdminAvatar" class="profile-avatar">A</span>
+
+        <div>
+          <strong id="sidebarAdminName">Admin User</strong>
+          <small>System Administrator</small>
+        </div>
+      </div>
+
+      <p class="label">ADMIN MENU</p>
+
+      <nav>
+        <a href="admin-dashboard.html">
+          <span>▦</span> Dashboard
+        </a>
+
+        <a href="admin-low-stock.html">
+          <span>!</span> Low Stock Items
+        </a>
+
+        <a href="admin-saved-restock-lists.html">
+          <span>▤</span> Saved Restock Lists
+        </a>
+
+        <a href="admin-stock-history.html">
+          <span>◷</span> Stock History
+        </a>
+
+        <a href="admin-item-summary.html">
+          <span>▤</span> Item Summary
+        </a>
+
+        <a href="admin-product-management.html">
+          <span>◇</span> Product Management
+        </a>
+
+        <a href="admin-manage-user.html">
+          <span>♙</span> Manage User
+        </a>
+
+        <a class="active" href="admin-activity-log.html">
+          <span>◉</span> System Activity Log
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <span class="online-dot"></span>
+        System Online
+      </div>
+    </aside>
+
+    <main>
+      <div class="top">
+        <div>
+          <p class="page-kicker">SYSTEM MONITORING</p>
+          <h1>System Activity Log</h1>
+          <p>Audit record of user access and important system changes.</p>
+        </div>
+
+        <div class="user-section">
+          <span id="adminAvatar" class="profile-avatar small-avatar">A</span>
+          <span id="adminName">Admin User</span>
+          <button id="logoutButton" type="button">Logout</button>
+        </div>
+      </div>
+
+      <section class="card">
+        <div class="card-heading">
+          <div>
+            <p class="card-kicker">AUDIT TRAIL</p>
+            <h2>Activity Records</h2>
+            <p>Review login activity and important changes made in SIMS.</p>
+          </div>
+        </div>
+
+        <div class="filters">
+          <input
+            id="searchInput"
+            type="text"
+            placeholder="Search user, activity, or details..."
+          >
+
+          <input id="dateFilter" type="date">
+
+          <button id="clearFilterButton" type="button">
+            Clear Filters
+          </button>
+
+          <button id="clearHistoryButton" type="button">
+            Clear All History
+          </button>
+        </div>
+
+        <p id="message" class="message"></p>
+        <p id="resultCount" class="result-count"></p>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Date & Time</th>
+                <th>User</th>
+                <th>Role</th>
+                <th>Activity</th>
+                <th>Details</th>
+              </tr>
+            </thead>
+
+            <tbody id="activityTableBody"></tbody>
+          </table>
+        </div>
+
+        <p id="emptyMessage" class="empty-message">
+          No activity records found.
+        </p>
+      </section>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../JAVASCRIPT/admin-activity-log.js"></script>
+</body>
+</html>
