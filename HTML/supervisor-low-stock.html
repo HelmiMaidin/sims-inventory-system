@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
   <title>SIMS | Low Stock Items</title>
 
   <link rel="stylesheet" href="../CSS/supervisor-low-stock.css">
@@ -21,7 +24,10 @@
       </div>
 
       <div class="supervisor-mini-profile">
-        <span id="sidebarSupervisorAvatar" class="profile-avatar">
+        <span
+          id="sidebarSupervisorAvatar"
+          class="profile-avatar"
+        >
           S
         </span>
 
@@ -44,6 +50,10 @@
           <span>!</span> Low Stock Items
         </a>
 
+        <a href="supervisor-item-availability.html">
+          <span>▣</span> Item Availability
+        </a>
+
         <a href="supervisor-edit-item.html">
           <span>✎</span> Edit Item
         </a>
@@ -64,9 +74,7 @@
         <div>
           <p class="page-kicker">RESTOCK MONITORING</p>
           <h1>Low Stock Items</h1>
-          <p>
-            Products with quantity below their minimum stock level.
-          </p>
+          <p>Products with quantity below their minimum stock level.</p>
         </div>
 
         <div class="user-section">
@@ -90,9 +98,7 @@
 
         <div>
           <strong>Restock attention required</strong>
-          <p>
-            Select the products to purchase, then export the selected list.
-          </p>
+          <p>Select products to purchase, save, or export the selected list.</p>
         </div>
       </section>
 
@@ -118,6 +124,14 @@
 
           <div class="export-buttons">
             <button
+              id="saveSelectedListButton"
+              class="export-button save-button"
+              type="button"
+            >
+              Save Selected List
+            </button>
+
+            <button
               id="exportExcelButton"
               class="export-button excel-button"
               type="button"
@@ -140,8 +154,25 @@
             <thead>
               <tr>
                 <th>Barcode</th>
-                <th>Category</th>
-                <th>Product</th>
+
+                <th
+                  class="sortable-header"
+                  data-sort-key="category"
+                  role="button"
+                  tabindex="0"
+                >
+                  Category ↕
+                </th>
+
+                <th
+                  class="sortable-header"
+                  data-sort-key="name"
+                  role="button"
+                  tabindex="0"
+                >
+                  Product ↕
+                </th>
+
                 <th>Unit</th>
                 <th>Minimum Quantity</th>
                 <th>Current Quantity</th>
@@ -180,6 +211,44 @@
         </p>
       </section>
     </main>
+  </div>
+
+  <!-- Save choice popup -->
+  <div id="saveChoiceModal" class="choice-modal" hidden>
+    <div class="choice-modal-box" role="dialog" aria-modal="true">
+      <div class="choice-modal-content">
+        <h2>A restock list already exists</h2>
+        <p>
+          You already saved a restock list today. Choose what you want to do.
+        </p>
+      </div>
+
+      <div class="choice-modal-actions">
+        <button
+          id="cancelSaveButton"
+          type="button"
+          class="choice-button cancel-choice"
+        >
+          Cancel
+        </button>
+
+        <button
+          id="saveNewButton"
+          type="button"
+          class="choice-button new-choice"
+        >
+          Save New
+        </button>
+
+        <button
+          id="overwriteSaveButton"
+          type="button"
+          class="choice-button overwrite-choice"
+        >
+          Overwrite
+        </button>
+      </div>
+    </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
