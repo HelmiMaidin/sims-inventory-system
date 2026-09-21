@@ -1,1 +1,215 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIMS | Item Summary</title>
 
+  <link rel="stylesheet" href="../CSS/admin-item-summary.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+  <div class="layout">
+    <aside>
+      <div class="brand">
+        <span class="brand-mark">▦</span>
+
+        <div>
+          <strong>SIMS</strong>
+          <small>Inventory System</small>
+        </div>
+      </div>
+
+      <div class="admin-mini-profile">
+        <span id="sidebarAdminAvatar" class="profile-avatar">A</span>
+
+        <div>
+          <strong id="sidebarAdminName">Admin User</strong>
+          <small>System Administrator</small>
+        </div>
+      </div>
+
+      <p class="label">ADMIN MENU</p>
+
+      <nav>
+        <a href="admin-dashboard.html">
+          <span>▦</span> Dashboard
+        </a>
+
+        <a href="admin-low-stock.html">
+          <span>!</span> Low Stock Items
+        </a>
+
+        <a href="admin-saved-restock-lists.html">
+          <span>▤</span> Saved Restock Lists
+        </a>
+
+        <a href="admin-stock-history.html">
+          <span>◷</span> Stock History
+        </a>
+
+        <a class="active" href="admin-item-summary.html">
+          <span>▤</span> Item Summary
+        </a>
+
+        <a href="admin-product-management.html">
+          <span>◇</span> Product Management
+        </a>
+
+        <a href="admin-manage-user.html">
+          <span>♙</span> Manage User
+        </a>
+
+        <a href="admin-activity-log.html">
+          <span>◉</span> System Activity Log
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <span class="online-dot"></span>
+        System Online
+      </div>
+    </aside>
+
+    <main>
+      <div class="top">
+        <div>
+          <p class="page-kicker">SPENDING & PROCUREMENT</p>
+          <h1>Item Summary</h1>
+          <p>Stock In and new-item records, including archived products.</p>
+        </div>
+
+        <div class="user-section">
+          <span id="adminAvatar" class="profile-avatar small-avatar">A</span>
+          <span id="adminName">Admin User</span>
+          <button id="logoutButton" type="button">Logout</button>
+        </div>
+      </div>
+
+      <section class="stats">
+        <article class="stat-card purple-stat">
+          <div class="stat-top">
+            <span class="stat-icon">▤</span>
+            <span class="stat-badge">Records</span>
+          </div>
+
+          <p>Stock Added Records</p>
+          <h2 id="recordCount">0</h2>
+          <span>Stock In and new item records</span>
+        </article>
+
+        <article class="stat-card blue-stat">
+          <div class="stat-top">
+            <span class="stat-icon">+</span>
+            <span class="stat-badge">Received</span>
+          </div>
+
+          <p>Total Quantity Added</p>
+          <h2 id="totalQuantity">0</h2>
+          <span>Units added in the selected period</span>
+        </article>
+
+        <article class="stat-card green-stat">
+          <div class="stat-top">
+            <span class="stat-icon">RM</span>
+            <span class="stat-badge">Spending</span>
+          </div>
+
+          <p>Total Stock Spend</p>
+          <h2 id="totalSpend">RM 0.00</h2>
+          <span>Quantity × recorded unit price</span>
+        </article>
+      </section>
+
+      <section class="card">
+        <div class="card-heading">
+          <div>
+            <p class="card-kicker">PROCUREMENT ANALYSIS</p>
+            <h2>Stock Added Spending Report</h2>
+            <p>Review Stock In and new item records by year and month.</p>
+          </div>
+        </div>
+
+        <div class="filters">
+          <select id="yearFilter">
+            <option value="All">All Years</option>
+          </select>
+
+          <select id="monthFilter">
+            <option value="All">All Months</option>
+            <option value="01">January</option>
+            <option value="02">February</option>
+            <option value="03">March</option>
+            <option value="04">April</option>
+            <option value="05">May</option>
+            <option value="06">June</option>
+            <option value="07">July</option>
+            <option value="08">August</option>
+            <option value="09">September</option>
+            <option value="10">October</option>
+            <option value="11">November</option>
+            <option value="12">December</option>
+          </select>
+
+          <button id="clearFiltersButton" type="button">
+            Clear Filters
+          </button>
+
+          <button id="exportAnnualReportButton" type="button">
+            Export Report
+          </button>
+        </div>
+
+        <div class="chart-section">
+          <div class="chart-head">
+            <div>
+              <p class="card-kicker">SPENDING TREND</p>
+              <h2>Total Stock Spend</h2>
+              <p>Calculated from quantity added and its recorded unit price.</p>
+            </div>
+          </div>
+
+          <div class="chart-box">
+            <canvas id="spendChart"></canvas>
+          </div>
+        </div>
+
+        <div class="table-heading">
+          <h2>Stock Added Record Details</h2>
+          <p>Deleted history records will also disappear from this report.</p>
+        </div>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Date & Time</th>
+                <th>Activity Type</th>
+                <th>Barcode</th>
+                <th>Product Name</th>
+                <th>Item Status</th>
+                <th>Quantity Added</th>
+                <th>Unit Price</th>
+                <th>Total Spend</th>
+                <th>Reason</th>
+                <th>Recorded By</th>
+              </tr>
+            </thead>
+
+            <tbody id="summaryTableBody"></tbody>
+          </table>
+        </div>
+
+        <p id="emptyMessage" class="empty-message">
+          No Stock In or Add Item records match the selected period.
+        </p>
+      </section>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+  <script src="../JAVASCRIPT/admin-item-summary.js"></script>
+</body>
+</html>
