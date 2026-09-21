@@ -54,7 +54,7 @@ function getAvailabilityStatus(product) {
     };
   }
 
-  if (stock <= minimumStock) {
+  if (stock < minimumStock) {
     return {
       text: "Low Stock",
       className: "low-stock"
@@ -140,7 +140,6 @@ async function loadProducts() {
   if (error) {
     products = [];
     productTableBody.innerHTML = "";
-
     resultCount.textContent = "";
 
     emptyMessage.textContent =
@@ -202,7 +201,7 @@ async function initialisePage() {
   currentUser = {
     id: profile.id,
     username: profile.username,
-    name: profile.full_name,
+    name: profile.full_name || profile.username,
     role: profile.role
   };
 
